@@ -1,5 +1,8 @@
 package com.tecsoftiam.webapp;
 
+/**
+ * login bean, TODO
+ */
 public class LoginBean {
     private static final long serialVersionUID = 1L;
     private String username;
@@ -21,4 +24,3 @@ public class LoginBean {
         this.password = password;
     }
 }
-

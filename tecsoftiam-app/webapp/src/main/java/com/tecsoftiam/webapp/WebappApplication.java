@@ -17,10 +17,13 @@ import com.azure.identity.ClientSecretCredentialBuilder;
 import com.google.gson.JsonObject;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
 import com.microsoft.graph.models.Request;
+import com.microsoft.graph.models.Subscription;
 import com.microsoft.graph.options.HeaderOption;
 import com.microsoft.graph.options.Option;
 import com.microsoft.graph.requests.GraphServiceClient;
 import com.microsoft.graph.requests.GroupCollectionPage;
+import com.microsoft.graph.requests.SubscriptionCollectionPage;
+import com.microsoft.graph.requests.SubscriptionCollectionResponse;
 import com.microsoft.graph.requests.UserCollectionPage;
 import com.microsoft.graph.serializer.ISerializer;
 
@@ -29,83 +32,38 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.web.bind.annotation.InitBinder;
+
 import java.io.IOException;
 import java.util.Properties;
+
 @SpringBootApplication
-public class WebappApplication  extends SpringBootServletInitializer {
+public class WebappApplication extends SpringBootServletInitializer {
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(WebappApplication.class);
 	}
-	
+
 	public static void main(String[] args) throws IOException, SQLException {
-	//load oAuth properties for graph api
-		Properties properties = new Properties();
-		final Properties oAuthProperties = new Properties();	
-		oAuthProperties.load(WebappApplication.class.getClassLoader().getResourceAsStream("oAuth.properties"));	
-		final List<String> scopes = Arrays
-			.asList(oAuthProperties.getProperty("app.scopes").split(","));
-		final String clientId = oAuthProperties.getProperty("app.id");
-		final String clientSecret = oAuthProperties.getProperty("app.secret");
-		final String tenant = oAuthProperties.getProperty("app.tenant");
-		
-		final ClientSecretCredential clientSecretCredential = new ClientSecretCredentialBuilder()
-        .clientId(clientId)
-        .clientSecret(clientSecret)
-        .tenantId(tenant)
-        .build();
+		final Properties properties = new Properties();
+		Graph graphtest = new Graph();
+		graphtest.initializeGraphAuth();
+		graphtest.getAdUserList();
+		// graphtest.getSubscriptionsList();
 
-final TokenCredentialAuthProvider tokenCredentialAuthProvider = new TokenCredentialAuthProvider(scopes, clientSecretCredential);
+		// load app properties
+		properties.load(WebappApplication.class.getClassLoader().getResourceAsStream("application.properties"));
+		// connect to db
+		Connection connection = DriverManager.getConnection(properties.getProperty("url"), properties);
 
-/*final GraphServiceClient graphClient =
-  GraphServiceClient
-    .builder()
-    .authenticationProvider(tokenCredentialAuthProvider)
-    .buildClient();*/
-	
-final GraphServiceClient graphClient = 
-	GraphServiceClient
-	  .builder()
-	  .authenticationProvider(tokenCredentialAuthProvider)
-	  .buildClient();
-	  LinkedList<Option> requestOptions = new LinkedList<Option>();
-	  requestOptions.add(new HeaderOption("ConsistencyLevel", "eventual"));
-final	UserCollectionPage usersList = graphClient.users()
-	.buildRequest(requestOptions )
-	.select("displayName")
-	.get();
-	
-final com.microsoft.graph.models.User usr = graphClient.users("{6345e4c6-c091-4c40-811c-34a6b952451b}")
-	.buildRequest()
-	.select("displayName")
-	.get();
-//final com.microsoft.graph.models.User me = graphClient.me().buildRequest().get();
-List<com.microsoft.graph.models.User> usrList= usersList.getCurrentPage();
-for(int i = 0; i < usrList.size(); i++) {
-	System.out.println(usrList.get(i).displayName);
-}
-//System.out.println("users: " + usrList);
-
-		
-		
-
-		    
-	
-
-		//load app properties	
-		properties.load(WebappApplication.class.getClassLoader().getResourceAsStream("application.properties")); 
-		 //connect to db
-        Connection connection = DriverManager.getConnection(properties.getProperty("url"), properties);
-
-		dbConnect db= new dbConnect();
-		User user = new User((long) 1,"oli","test");
+		//test to read into the db
+		dbConnect db = new dbConnect();
+		User user = new User((long) 1, "oli", "test");
 		user = db.readData(connection);
 
 		SpringApplication.run(WebappApplication.class, args);
-		String url = "https://api.github.com/users/mhinzey/repos";
-		
-		
+
 	}
 
 }

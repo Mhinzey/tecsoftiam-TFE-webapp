@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * Controller for web app
+ */
 @Controller
 public class WelcomeController {
 
@@ -23,9 +26,10 @@ public class WelcomeController {
     }
 
     @GetMapping("/welcome")
-	public String greeting(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
-		model.addAttribute("name", name);
-		return "greeting";
-	}
+    public String greeting(@RequestParam(name = "name", required = false, defaultValue = "World") String name,
+            Model model) {
+        model.addAttribute("name", name);
+        return "greeting";
+    }
 
 }

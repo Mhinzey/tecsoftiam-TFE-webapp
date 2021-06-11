@@ -1,5 +1,7 @@
 package com.tecsoftiam.webapp;
-
+/**
+ * User class (will probably change and get adapted)
+ */
 public class User {
     private long id;
     private String Username;
