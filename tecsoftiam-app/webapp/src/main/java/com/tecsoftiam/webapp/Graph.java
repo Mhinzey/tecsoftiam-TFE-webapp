@@ -22,9 +22,11 @@ import com.microsoft.graph.logger.DefaultLogger;
 import com.microsoft.graph.logger.LoggerLevel;
 import com.microsoft.graph.models.Attendee;
 import com.microsoft.graph.models.DateTimeTimeZone;
+import com.microsoft.graph.models.DirectoryRole;
 import com.microsoft.graph.models.EmailAddress;
 import com.microsoft.graph.models.Event;
 import com.microsoft.graph.models.ItemBody;
+import com.microsoft.graph.models.RoleAssignment;
 import com.microsoft.graph.models.User;
 import com.microsoft.graph.models.AttendeeType;
 import com.microsoft.graph.models.BodyType;
@@ -34,6 +36,7 @@ import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.GraphServiceClient;
 import com.microsoft.graph.requests.SubscriptionCollectionPage;
 import com.microsoft.graph.requests.UserCollectionPage;
+import com.microsoft.graph.requests.DirectoryRoleCollectionPage;
 import com.microsoft.graph.requests.EventCollectionPage;
 import com.microsoft.graph.requests.EventCollectionRequestBuilder;
 import java.util.Arrays;
@@ -106,5 +109,13 @@ public class Graph {
             System.out.println(("Subscriptions:" + subsList.get(i)));
         }
         return subsList;
+    }
+
+    public List<DirectoryRole> getDirectoryRoles(){
+        final DirectoryRoleCollectionPage directoryRoles = graphClient.directoryRoles()
+            .buildRequest()
+            .get();
+        List<DirectoryRole> roleList = directoryRoles.getCurrentPage();
+        return roleList;
     }
 }

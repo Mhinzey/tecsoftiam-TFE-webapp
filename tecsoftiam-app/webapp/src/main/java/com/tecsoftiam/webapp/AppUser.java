@@ -2,7 +2,7 @@ package com.tecsoftiam.webapp;
 /**
  * User class (will probably change and get adapted)
  */
-public class User {
+public class AppUser {
     private long id;
     private String Username;
     private String Email;
@@ -40,11 +40,11 @@ public class User {
         this.done = done;
     }
 
-    public User(){
+    public AppUser(){
 
     }
 
-    public User(Long id, String Username,String Email){
+    public AppUser(Long id, String Username,String Email){
         this.id=id;
         this.Username=Username;
         this.Email=Email;

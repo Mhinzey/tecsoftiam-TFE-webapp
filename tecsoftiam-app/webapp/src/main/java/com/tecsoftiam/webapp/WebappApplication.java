@@ -49,18 +49,17 @@ public class WebappApplication extends SpringBootServletInitializer {
 		final Properties properties = new Properties();
 		Graph graphtest = new Graph();
 		graphtest.initializeGraphAuth();
-		graphtest.getAdUserList();
+		
 		// graphtest.getSubscriptionsList();
 
-		// load app properties
-		properties.load(WebappApplication.class.getClassLoader().getResourceAsStream("application.properties"));
-		// connect to db
-		Connection connection = DriverManager.getConnection(properties.getProperty("url"), properties);
-
+	
 		//test to read into the db
 		dbConnect db = new dbConnect();
-		User user = new User((long) 1, "oli", "test");
-		user = db.readData(connection);
+		AppUser user = new AppUser((long) 1, "oli", "test");
+		//user = db.readData();
+		//db.InsertMultipleUsers(graphtest.getAdUserList());
+		//System.out.println(db.HasBeenAdded(graphtest.getAdUserList()));
+		System.out.println(db.Suppressed());
 
 		SpringApplication.run(WebappApplication.class, args);
 
