@@ -22,6 +22,8 @@ import com.microsoft.graph.logger.DefaultLogger;
 import com.microsoft.graph.logger.LoggerLevel;
 import com.microsoft.graph.models.Attendee;
 import com.microsoft.graph.models.DateTimeTimeZone;
+import com.microsoft.graph.models.DirectoryAudit;
+import com.microsoft.graph.models.DirectoryObject;
 import com.microsoft.graph.models.DirectoryRole;
 import com.microsoft.graph.models.EmailAddress;
 import com.microsoft.graph.models.Event;
@@ -36,6 +38,8 @@ import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.GraphServiceClient;
 import com.microsoft.graph.requests.SubscriptionCollectionPage;
 import com.microsoft.graph.requests.UserCollectionPage;
+import com.microsoft.graph.requests.DirectoryAuditCollectionPage;
+import com.microsoft.graph.requests.DirectoryObjectCollectionWithReferencesPage;
 import com.microsoft.graph.requests.DirectoryRoleCollectionPage;
 import com.microsoft.graph.requests.EventCollectionPage;
 import com.microsoft.graph.requests.EventCollectionRequestBuilder;
@@ -112,10 +116,62 @@ public class Graph {
     }
 
     public List<DirectoryRole> getDirectoryRoles(){
-        final DirectoryRoleCollectionPage directoryRoles = graphClient.directoryRoles()
+        DirectoryRoleCollectionPage directoryRoles = graphClient.directoryRoles()
             .buildRequest()
             .get();
         List<DirectoryRole> roleList = directoryRoles.getCurrentPage();
+        while(directoryRoles.getNextPage() != null){
+            directoryRoles = directoryRoles.getNextPage().buildRequest().get();
+            roleList.addAll(directoryRoles.getCurrentPage());
+        }
         return roleList;
+    }
+
+    public List<DirectoryObject> getUserRoles(String id){
+        DirectoryObjectCollectionWithReferencesPage members = graphClient.directoryRoles("roleTemplateId="+id).members()
+            .buildRequest()
+            .get();
+
+        List<DirectoryObject> users = members.getCurrentPage();
+        while(members.getNextPage() != null){
+            members = members.getNextPage() .buildRequest().get();
+            users.addAll(members.getCurrentPage());
+        }
+        System.out.println(users.size());
+        User usr;
+        for(int i=0; i<users.size();i++){
+            usr= (User)users.get(i);
+            System.out.println("Role:" + usr.displayName);
+        }
+        return users;
+    }
+    public List<DirectoryAudit> getDirectoryAudits (){
+        requestOptions.add(new QueryOption("$filter", "activityDisplayName eq 'Add user'"));
+        DirectoryAuditCollectionPage directoryAudits = graphClient.auditLogs().directoryAudits()
+        .buildRequest(requestOptions)
+        .get();
+        List<DirectoryAudit> audits = directoryAudits.getCurrentPage();
+        while(directoryAudits.getNextPage() != null){
+            directoryAudits = directoryAudits.getNextPage().buildRequest().get();
+            audits.addAll(directoryAudits.getCurrentPage());
+        }
+        return audits;
+    }
+    //test purpose; print logs info
+    public String AuditBy(DirectoryAudit audit){
+        String type=audit.activityDisplayName;
+        String time= audit.activityDateTime.toString();
+        String by= audit.initiatedBy.user.id;
+        return type + time + by;
+    }
+    // get all audit logs for user add
+    public void AllAudit(){
+        List<DirectoryAudit> lst;
+        lst= getDirectoryAudits();
+        DirectoryAudit audit;
+        for(int i=0; i<lst.size();i++){
+            audit= (DirectoryAudit)lst.get(i);
+            System.out.println(AuditBy(audit));
+        }
     }
 }

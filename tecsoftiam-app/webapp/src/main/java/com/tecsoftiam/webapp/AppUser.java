@@ -2,10 +2,24 @@ package com.tecsoftiam.webapp;
 /**
  * User class (will probably change and get adapted)
  */
+
 public class AppUser {
     private long id;
     private String Username;
-    private String Email;
+    private String Email, Password;
+
+    public String getPassword() {
+        return this.Password;
+    }
+
+    public void setPassword(String Password) {
+        this.Password = Password;
+    }
+
+    public boolean getDone() {
+        return this.done;
+    }
+
     private boolean done=true;
 
     public long getId() {

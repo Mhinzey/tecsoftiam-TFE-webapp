@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -16,6 +17,7 @@ import com.azure.identity.ClientSecretCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.google.gson.JsonObject;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
+import com.microsoft.graph.models.DirectoryAudit;
 import com.microsoft.graph.models.Request;
 import com.microsoft.graph.models.Subscription;
 import com.microsoft.graph.options.HeaderOption;
@@ -45,7 +47,7 @@ public class WebappApplication extends SpringBootServletInitializer {
 		return application.sources(WebappApplication.class);
 	}
 
-	public static void main(String[] args) throws IOException, SQLException {
+	public static void main(String[] args) throws IOException, SQLException, ParseException {
 		final Properties properties = new Properties();
 		Graph graphtest = new Graph();
 		graphtest.initializeGraphAuth();
@@ -56,11 +58,10 @@ public class WebappApplication extends SpringBootServletInitializer {
 		//test to read into the db
 		dbConnect db = new dbConnect();
 		AppUser user = new AppUser((long) 1, "oli", "test");
-		//user = db.readData();
-		//db.InsertMultipleUsers(graphtest.getAdUserList());
-		//System.out.println(db.HasBeenAdded(graphtest.getAdUserList()));
-		System.out.println(db.Suppressed());
-
+		
+		
+		//List<DirectoryAudit> liste= graphtest.getDirectoryAudits();
+		//db.insertAllLogs(liste);
 		SpringApplication.run(WebappApplication.class, args);
 
 	}
