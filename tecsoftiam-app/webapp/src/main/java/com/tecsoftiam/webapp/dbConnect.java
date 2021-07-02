@@ -3,12 +3,16 @@ package com.tecsoftiam.webapp;
 import java.io.IOException;
 import java.sql.*;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.logging.Logger;
 
 import javax.servlet.jsp.jstl.sql.Result;
 
+import com.microsoft.graph.models.DirectoryAudit;
 import com.microsoft.graph.models.DirectoryRole;
 import com.microsoft.graph.models.User;
 
@@ -35,6 +39,8 @@ public class dbConnect {
         insertStatement.setBoolean(4, user.isDone());
         insertStatement.executeUpdate();
     }
+
+  
 
     AppUser readData( ) throws SQLException {
         System.out.println("Read data");
@@ -131,6 +137,7 @@ public class dbConnect {
                 insertStatement.setString(2, role.description);
                 insertStatement.setString(3, role.id);
                 insertStatement.setString(4, role.roleTemplateId);
+                insertStatement.executeUpdate();
     }
 
     public void insertAllDirectoryRoles(List<DirectoryRole> lst) throws SQLException{
@@ -138,6 +145,18 @@ public class dbConnect {
             InsertRoleInDb(lst.get(i));
         }
     }
-    
-   
+    public void insertUserLogs(DirectoryAudit audit) throws ParseException, SQLException{
+        PreparedStatement insertStatement = connection
+        .prepareStatement("INSERT IGNORE INTO useraddlogs ( date, userId ) VALUES (?, ?) ;");
+        LocalDate localDate=audit.activityDateTime.toLocalDate();
+        insertStatement.setDate(1,  java.sql.Date.valueOf(localDate));
+        insertStatement.setString(2, audit.initiatedBy.user.id);
+        insertStatement.executeUpdate();
+        
+    }
+    public void insertAllLogs(List<DirectoryAudit> lst) throws ParseException, SQLException{
+        for (int i = 0; i < lst.size(); i++) {
+            insertUserLogs(lst.get(i));
+        }
+    }
 }
