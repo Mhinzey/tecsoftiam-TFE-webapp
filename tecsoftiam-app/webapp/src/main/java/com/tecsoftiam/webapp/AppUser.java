@@ -10,6 +10,28 @@ public class AppUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY) private long id;
     private String username;
     private String email, password;
+    private boolean enabled;
+    private String role;
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public boolean getEnabled() {
+        return this.enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getRole() {
+        return this.role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public String getPassword() {
         return this.password;
@@ -19,11 +41,7 @@ public class AppUser {
         this.password = Password;
     }
 
-    public boolean getDone() {
-        return this.done;
-    }
-
-    private boolean done=true;
+   
 
     public long getId() {
         return this.id;
@@ -49,14 +67,7 @@ public class AppUser {
         this.email = Email;
     }
 
-    public boolean isDone() {
-        return this.done;
-    }
-
-    public void setDone(boolean done) {
-        this.done = done;
-    }
-
+  
     public AppUser(){
 
     }
@@ -72,7 +83,7 @@ public class AppUser {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", done=" + done +
+                
                 '}';
     }
 

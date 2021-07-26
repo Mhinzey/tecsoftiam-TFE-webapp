@@ -1,4 +1,4 @@
-package com.tecsoftiam.webapp;
+package com.tecsoftiam;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -18,8 +18,10 @@ import com.azure.identity.ClientSecretCredentialBuilder;
 import com.google.gson.JsonObject;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
 import com.microsoft.graph.models.DirectoryAudit;
+import com.microsoft.graph.models.DirectoryRole;
 import com.microsoft.graph.models.Request;
 import com.microsoft.graph.models.Subscription;
+import com.microsoft.graph.models.User;
 import com.microsoft.graph.options.HeaderOption;
 import com.microsoft.graph.options.Option;
 import com.microsoft.graph.requests.GraphServiceClient;
@@ -28,6 +30,9 @@ import com.microsoft.graph.requests.SubscriptionCollectionPage;
 import com.microsoft.graph.requests.SubscriptionCollectionResponse;
 import com.microsoft.graph.requests.UserCollectionPage;
 import com.microsoft.graph.serializer.ISerializer;
+import com.tecsoftiam.webapp.AppUser;
+import com.tecsoftiam.webapp.Graph;
+import com.tecsoftiam.webapp.dbConnect;
 
 import org.json.JSONObject;
 import org.springframework.boot.SpringApplication;
@@ -57,11 +62,17 @@ public class WebappApplication extends SpringBootServletInitializer {
 	
 		//test to read into the db
 		dbConnect db = new dbConnect();
-		AppUser user = new AppUser((long) 1, "oli", "test");
-		
-		
+		//AppUser user = new AppUser((long) 1, "oli", "test");
+		//db.insertCreatedDate();
+		//graphtest.AllAudit();
+		//List<User> lst= graphtest.getAdUserList();
+		//db.InsertMultipleUsers(lst);
 		//List<DirectoryAudit> liste= graphtest.getDirectoryAudits();
 		//db.insertAllLogs(liste);
+		//List<DirectoryRole> lst =graphtest.getDirectoryRoles();
+		//db.insertAllDirectoryRoles(lst);
+		//db.matchRoles();
+		graphtest.grantRole("88d8e3e3-8f55-4a1e-953a-9b9898b8876b", "ccfdd40e-23be-450e-bd6c-01aa7ce689a8");
 		SpringApplication.run(WebappApplication.class, args);
 
 	}

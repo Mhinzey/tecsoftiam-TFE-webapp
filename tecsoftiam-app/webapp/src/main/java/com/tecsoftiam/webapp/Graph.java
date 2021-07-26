@@ -24,11 +24,15 @@ import com.microsoft.graph.models.Attendee;
 import com.microsoft.graph.models.DateTimeTimeZone;
 import com.microsoft.graph.models.DirectoryAudit;
 import com.microsoft.graph.models.DirectoryObject;
+import com.microsoft.graph.models.DirectoryObjectGetMemberGroupsParameterSet;
 import com.microsoft.graph.models.DirectoryRole;
 import com.microsoft.graph.models.EmailAddress;
 import com.microsoft.graph.models.Event;
+import com.microsoft.graph.models.Group;
 import com.microsoft.graph.models.ItemBody;
+import com.microsoft.graph.models.PasswordProfile;
 import com.microsoft.graph.models.RoleAssignment;
+import com.microsoft.graph.models.TargetResource;
 import com.microsoft.graph.models.User;
 import com.microsoft.graph.models.AttendeeType;
 import com.microsoft.graph.models.BodyType;
@@ -36,13 +40,20 @@ import com.microsoft.graph.options.HeaderOption;
 import com.microsoft.graph.options.Option;
 import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.GraphServiceClient;
+import com.microsoft.graph.requests.GroupCollectionPage;
 import com.microsoft.graph.requests.SubscriptionCollectionPage;
 import com.microsoft.graph.requests.UserCollectionPage;
+import com.tecsoftiam.WebappApplication;
+
+import org.h2.engine.SysProperties;
+
 import com.microsoft.graph.requests.DirectoryAuditCollectionPage;
 import com.microsoft.graph.requests.DirectoryObjectCollectionWithReferencesPage;
 import com.microsoft.graph.requests.DirectoryRoleCollectionPage;
 import com.microsoft.graph.requests.EventCollectionPage;
 import com.microsoft.graph.requests.EventCollectionRequestBuilder;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -88,7 +99,9 @@ public class Graph {
     }
     //return user with specific ID
     public com.microsoft.graph.models.User getAdUser(String id) {
-        return graphClient.users(id).buildRequest().select("displayName").get();
+        
+        return graphClient.users(id).buildRequest().get();
+
     }
 
     //return a list of Users using graph model
@@ -96,10 +109,7 @@ public class Graph {
 
         final UserCollectionPage usersList = graphClient.users().buildRequest().get();
         List<com.microsoft.graph.models.User> usrList = usersList.getCurrentPage();
-        // testing purposes
-        for (int i = 0; i < usrList.size(); i++) {
-            System.out.println("User : " + usrList.get(i).displayName);
-        }
+     
         return usrList;
     }
 
@@ -115,6 +125,7 @@ public class Graph {
         return subsList;
     }
 
+    //get all roles active in AD
     public List<DirectoryRole> getDirectoryRoles(){
         DirectoryRoleCollectionPage directoryRoles = graphClient.directoryRoles()
             .buildRequest()
@@ -127,6 +138,14 @@ public class Graph {
         return roleList;
     }
 
+    public DirectoryRole getRoleDetails(String templateId){
+        return graphClient.directoryRoles("roleTemplateId="+templateId)
+        .buildRequest()
+        .get();
+
+    }
+
+    //get all users having a role with templateId 
     public List<DirectoryObject> getUserRoles(String id){
         DirectoryObjectCollectionWithReferencesPage members = graphClient.directoryRoles("roleTemplateId="+id).members()
             .buildRequest()
@@ -141,10 +160,35 @@ public class Graph {
         User usr;
         for(int i=0; i<users.size();i++){
             usr= (User)users.get(i);
-            System.out.println("Role:" + usr.displayName);
+           // System.out.println("Role:" + usr.displayName);
         }
         return users;
     }
+    //return a list of all roles from a user/group
+    public List<DirectoryRole> GetAllRoleFrom(String id){
+        List<DirectoryRole> allRoles= getDirectoryRoles();
+        List<DirectoryRole> hasRole=new ArrayList<DirectoryRole>();
+        List<DirectoryObject> usersWRole=new ArrayList<DirectoryObject>();
+        User currentUser;
+        DirectoryRole role;
+        User usr= getAdUser(id);
+        System.out.println(usr.displayName);
+        for(int i=0; i<allRoles.size();i++){
+            role= allRoles.get(i);
+            usersWRole= getUserRoles(role.roleTemplateId);
+            for(int j=0; j<usersWRole.size();j++ ){
+                currentUser= (User)usersWRole.get(j);
+                if(currentUser.displayName.equals(usr.displayName)){
+                    
+                    hasRole.add(role);
+                }
+            }
+        }
+        return hasRole;
+    }
+
+   
+
     public List<DirectoryAudit> getDirectoryAudits (){
         requestOptions.add(new QueryOption("$filter", "activityDisplayName eq 'Add user'"));
         DirectoryAuditCollectionPage directoryAudits = graphClient.auditLogs().directoryAudits()
@@ -162,7 +206,11 @@ public class Graph {
         String type=audit.activityDisplayName;
         String time= audit.activityDateTime.toString();
         String by= audit.initiatedBy.user.id;
-        return type + time + by;
+        String cible= audit.toString();
+        for (int i=0; i<audit.targetResources.size();i++) {
+            System.out.println(audit.targetResources.get(i).id);
+        }
+        return type + time + by + cible;
     }
     // get all audit logs for user add
     public void AllAudit(){
@@ -173,5 +221,90 @@ public class Graph {
             audit= (DirectoryAudit)lst.get(i);
             System.out.println(AuditBy(audit));
         }
+    }
+    //create user in the active directory
+    public void CreateUser(String display, String mailNick, String mail, String name, String password){
+        
+        User user = new User();
+        user.accountEnabled = true;
+        user.displayName = display;
+        user.mailNickname = mailNick;
+        user.userPrincipalName = mail;
+        PasswordProfile passwordProfile = new PasswordProfile();
+        passwordProfile.forceChangePasswordNextSignIn = true;
+        passwordProfile.password = password;
+        user.passwordProfile = passwordProfile;
+
+        graphClient.users()
+            .buildRequest()
+            .post(user);
+
+            }
+            //change accountEnabled state of a user
+    public void changeActivate(User user, Boolean state){
+        if(state == true)
+        user.accountEnabled=false;
+        else user.accountEnabled=true;
+    }
+    //grant a ad role to a user / group
+    public void grantRole(String templateId, String toId){
+        DirectoryObject directoryObject = new DirectoryObject();
+        directoryObject.id = toId;
+
+        graphClient.directoryRoles("roleTemplateId="+templateId).members().references()
+            .buildRequest()
+            .post(directoryObject);
+    }
+    //delete role from user/group
+    public void deleteRoleFrom(String template, String idOf){
+        graphClient.directoryRoles("roleTemplateId="+template).members(idOf).reference()
+	.buildRequest()
+	.delete();
+
+    }
+    //get a list of all groups
+    public List<Group> getGroups(){
+        GroupCollectionPage groups = graphClient.groups()
+            .buildRequest()
+            .get();
+        List<Group> lst= groups.getCurrentPage();
+          while(groups.getNextPage() != null){
+            groups = groups.getNextPage() .buildRequest().get();
+            lst.addAll(groups.getCurrentPage());
+          }
+        return lst;
+    }
+
+    //add user to a group
+    public void addToGroup(String userId, String groupid){
+
+        DirectoryObject directoryObject = new DirectoryObject();
+        directoryObject.id = userId;
+
+        graphClient.groups(groupid).members().references()
+            .buildRequest()
+	.post(directoryObject);
+
+    }
+
+    //delete user from a group 
+    public void deleteFromGroup(String userId, String groupId){
+        graphClient.groups(groupId).members(userId).reference()
+	.buildRequest()
+	.delete();
+    }
+
+    //gte group list of a user/role
+    public void groupsOf(String id){
+        Boolean securityEnabledOnly = true;
+
+        graphClient.directoryObjects(id)
+            .getMemberGroups(DirectoryObjectGetMemberGroupsParameterSet
+                .newBuilder()
+                .withSecurityEnabledOnly(securityEnabledOnly)
+                .build())
+            .buildRequest()
+            .post();
+
     }
 }

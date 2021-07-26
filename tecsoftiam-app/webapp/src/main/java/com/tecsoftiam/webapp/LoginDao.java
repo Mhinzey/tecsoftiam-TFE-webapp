@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.Properties;
 
+import com.tecsoftiam.WebappApplication;
+
 public class LoginDao {
     public boolean validate(LoginBean loginBean) throws ClassNotFoundException, IOException {
         boolean status = false;

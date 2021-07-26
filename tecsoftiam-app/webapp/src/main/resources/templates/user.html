@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script type="text/javascript" th:src="@{/static/js/user.js}"></script>
+    <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}" />
+  </head>
+  <body>
+    <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]]</h3>
+    <div class="container">
+
+      <div th:if="${not #lists.isEmpty(users)}"></div>
+     
+      <table class = "table table-striped"> 
+        <thead>
+          <tr>
+              <th colspan="2">User details</th>
+          </tr>
+      </thead>     
+        <tbody>
+         <tr>
+         <th> User Name </th>
+         <th> User mail </th>
+      
+         <tr th:each="user : ${users}" style="cursor: pointer"  th:onclick="rowClicked([[${user.id}]])">
+         <td th:text="${user.displayName}" ></td>
+         <td th:text="${user.mail}" ></td>
+         </tr>
+        </tbody>
+        </table>
+</div>
+<button name="IndexButton" onclick="window.location.href='/index'">Home</button>
+<form th:action="@{/logout}" method="post">
+    <input type="submit" value="Logout" />
+</form>
+
+  </body>
+</html>

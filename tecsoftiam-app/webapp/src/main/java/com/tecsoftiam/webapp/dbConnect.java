@@ -13,10 +13,13 @@ import java.util.logging.Logger;
 import javax.servlet.jsp.jstl.sql.Result;
 
 import com.microsoft.graph.models.DirectoryAudit;
+import com.microsoft.graph.models.DirectoryObject;
 import com.microsoft.graph.models.DirectoryRole;
 import com.microsoft.graph.models.User;
+import com.tecsoftiam.WebappApplication;
 
 import org.h2.util.DateTimeUtils;
+import org.simpleframework.xml.filter.SystemFilter;
 
 /** database class, where queries will be written */
 public class dbConnect {
@@ -36,8 +39,9 @@ public class dbConnect {
         insertStatement.setLong(1, user.getId());
         insertStatement.setString(2, user.getUsername());
         insertStatement.setString(3, user.getEmail());
-        insertStatement.setBoolean(4, user.isDone());
+        insertStatement.setBoolean(4, user.isEnabled());
         insertStatement.executeUpdate();
+        connection.close();
     }
 
   
@@ -79,6 +83,7 @@ public class dbConnect {
                 insertStatement.setTimestamp(9, passChanged);
 
                 insertStatement.executeUpdate();
+                
             }
     
     public  void InsertMultipleUsers(List<User> list ) throws SQLException{
@@ -102,6 +107,7 @@ public class dbConnect {
                 newUsersId.add(Currentlist.get(i).displayName);
             }
         }
+        connection.close();
         return newUsersId;
     }
     //Return a list of (String) user suppressed from the AD
@@ -126,6 +132,7 @@ public class dbConnect {
         removed.addAll(dbUsers);
         removed.removeAll(adUsers);
         adUsers.removeAll(dbUsers);  
+        connection.close();
         return removed;
     }
 
@@ -138,6 +145,7 @@ public class dbConnect {
                 insertStatement.setString(3, role.id);
                 insertStatement.setString(4, role.roleTemplateId);
                 insertStatement.executeUpdate();
+                
     }
 
     public void insertAllDirectoryRoles(List<DirectoryRole> lst) throws SQLException{
@@ -145,18 +153,71 @@ public class dbConnect {
             InsertRoleInDb(lst.get(i));
         }
     }
+
+    
+    
     public void insertUserLogs(DirectoryAudit audit) throws ParseException, SQLException{
         PreparedStatement insertStatement = connection
-        .prepareStatement("INSERT IGNORE INTO useraddlogs ( date, userId ) VALUES (?, ?) ;");
+        .prepareStatement("INSERT INTO useraddlogs ( date, userId, targetId ) VALUES (?, ?, ?) ");
         LocalDate localDate=audit.activityDateTime.toLocalDate();
+        System.out.println(java.sql.Date.valueOf(localDate).toString()+"/"+audit.initiatedBy.user.id+"/"+audit.targetResources.get(0).id  );
         insertStatement.setDate(1,  java.sql.Date.valueOf(localDate));
         insertStatement.setString(2, audit.initiatedBy.user.id);
+        insertStatement.setString(3, audit.targetResources.get(0).id);
         insertStatement.executeUpdate();
+        //connection.close();
         
     }
     public void insertAllLogs(List<DirectoryAudit> lst) throws ParseException, SQLException{
         for (int i = 0; i < lst.size(); i++) {
             insertUserLogs(lst.get(i));
         }
+    }
+    public void insertCreatedDate() throws SQLException{
+        Map<String, Date> hmap = new HashMap<String, Date>();
+        ResultSet set;
+        PreparedStatement readStatement = connection.prepareStatement("SELECT userId, date FROM useraddlogs");
+        set=readStatement.executeQuery();
+        while(set.next()){            
+            String id = set.getString("userId");
+            Date date= set.getDate("date");
+            hmap.put(id, date);     
+             
+          } 
+           
+          for(String key : hmap.keySet()) {
+            Date value = hmap.get(key);
+            PreparedStatement updateStatement = connection.prepareStatement("UPDATE adusers set createdDateTime = ? where id= ?");
+            updateStatement.setDate(1, value);
+            updateStatement.setString(2, key);
+            updateStatement.executeUpdate();
+            
+        }
+        connection.close();
+    }
+
+    public void matchRoles() throws SQLException, IOException{
+        ResultSet set;
+        List<String> rolesTemplates= new ArrayList<String>();
+        Graph graph=new Graph();
+        PreparedStatement readStatement = connection.prepareStatement("SELECT  roleTemplateId FROM adrole");
+        set=readStatement.executeQuery();
+        while(set.next()){            
+            rolesTemplates.add(set.getString("roleTemplateId"));          
+          } 
+         for(int i = 0; i < rolesTemplates.size(); i++){
+             System.out.println(rolesTemplates.get(i));
+            List<DirectoryObject> lst= graph.getUserRoles(rolesTemplates.get(i));
+            
+            for(int j = 0; j < lst.size(); j++){
+                PreparedStatement insertStatement = connection
+                      .prepareStatement("INSERT INTO roleuser ( roleTemplateId, userId ) VALUES (?,?) ");
+                insertStatement.setString(1,rolesTemplates.get(i) );
+                insertStatement.setString(2, lst.get(j).id);
+                insertStatement.executeUpdate();
+                
+            } 
+        }            
+        connection.close();
     }
 }

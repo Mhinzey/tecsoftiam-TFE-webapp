@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class CustomUserDetailsService implements UserDetailsService {
  
@@ -12,10 +13,19 @@ public class CustomUserDetailsService implements UserDetailsService {
      
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AppUser user = userRepo.findByEmail(username);
+        AppUser user = userRepo.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
+        System.out.print(user.getPassword());
+        
+        
         return new CustomUserDetails(user);
     }
+    @Autowired
+private BCryptPasswordEncoder passwordEncoder;
+public void saveUser(AppUser user) {
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    userRepo.save(user);
+}
 }

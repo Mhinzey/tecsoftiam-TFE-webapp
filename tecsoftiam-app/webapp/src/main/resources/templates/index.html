@@ -1,24 +1,23 @@
 <!doctype html>
-<html ng-app="app">
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
   <head>
+    <meta charset="UTF-8"/>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-    <script src="components.js"></script>
-    <script src="app.js"></script>
-  </head>
+   <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}" />
+   </head>
   <body>
-    <tabs>
-      <pane title="Localization">
-        <span>Date: {{ '2012-04-01' | date:'fullDate' }}</span><br>
-        <span>Currency: {{ 123456 | currency }}</span><br>
-        <span>Number: {{ 98765.4321 | number }}</span><br>
-      </pane>
-      <pane title="Pluralization">
-        <div ng-controller="BeerCounter">
-          <div ng-repeat="beerCount in beers">
-            <ng-pluralize count="beerCount" when="beerForms"></ng-pluralize>
-          </div>
-        </div>
-      </pane>
-    </tabs>
+    <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]]</h3>
+    <div class="container">
+
+      <button name="userInfo" onclick="window.location.href='/users'">Informations utilisateurs</button>
+      <button name="roleInfo" onclick="window.location.href='/roles'">Informations roles</button>
+      <button name="changes" onclick="window.location.href='/changes'">Changements dans l'AD</button>
+     
+</div>
+<button name="IndexButton" onclick="window.location.href='/index'">Home</button>
+<form th:action="@{/logout}" method="post">
+    <input type="submit" value="Logout" />
+</form>
+
   </body>
 </html>

@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import com.microsoft.graph.models.User;
+import com.tecsoftiam.WebappApplication;
 
 public class UserService {
     Connection connection;
