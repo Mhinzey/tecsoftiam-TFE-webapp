@@ -47,6 +47,8 @@ import com.tecsoftiam.WebappApplication;
 
 import org.h2.engine.SysProperties;
 
+import javassist.expr.NewArray;
+
 import com.microsoft.graph.requests.DirectoryAuditCollectionPage;
 import com.microsoft.graph.requests.DirectoryObjectCollectionWithReferencesPage;
 import com.microsoft.graph.requests.DirectoryRoleCollectionPage;
@@ -55,6 +57,7 @@ import com.microsoft.graph.requests.EventCollectionRequestBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * Class using MS graph api to get AD objects
@@ -101,6 +104,18 @@ public class Graph {
     public com.microsoft.graph.models.User getAdUser(String id) {
         
         return graphClient.users(id).buildRequest().get();
+
+    }
+ 
+    public com.microsoft.graph.models.User getAdUserByDP(String displayName) {
+        List<User> list= getAdUserList();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).displayName.equals(displayName)){
+                return list.get(i);
+            } 
+        }
+
+        return null;
 
     }
 
@@ -186,6 +201,40 @@ public class Graph {
         }
         return hasRole;
     }
+    //return a list of roles the selected used is NOT a part of
+    public Set<DirectoryRole> NotHaveRoleList(String id){
+     
+        List<DirectoryRole> hasRole,allRole= new ArrayList<DirectoryRole>(); 
+        hasRole=GetAllRoleFrom(id);
+        allRole= getDirectoryRoles();
+        List<DirectoryRole> notHave= new ArrayList<DirectoryRole>();
+
+        DirectoryRole roleA, roleB;
+        boolean state;
+        Set<DirectoryRole> set= new HashSet<DirectoryRole>();
+        if(hasRole.size()==0) notHave=allRole;
+        else{
+        for(int i=0; i<allRole.size();i++){
+            roleA= allRole.get(i);
+            state=true;
+            for(int j=0; j<hasRole.size();j++ ){
+            roleB=hasRole.get(j);
+                if(roleA.displayName.equals(roleB.displayName)){                
+                   // notHave.remove(roleB);
+                   state=false;
+                }
+                if(state==true){
+                    notHave.add(roleA);
+                }
+            }
+        }
+    }
+    for (DirectoryRole r : notHave)
+        set.add(r);
+        
+    
+        return set;
+    }
 
    
 
@@ -228,8 +277,9 @@ public class Graph {
         User user = new User();
         user.accountEnabled = true;
         user.displayName = display;
-        user.mailNickname = mailNick;
-        user.userPrincipalName = mail;
+        user.userPrincipalName=mail;
+        user.mail = mail;
+        user.mailNickname=mailNick;
         PasswordProfile passwordProfile = new PasswordProfile();
         passwordProfile.forceChangePasswordNextSignIn = true;
         passwordProfile.password = password;
@@ -240,6 +290,13 @@ public class Graph {
             .post(user);
 
             }
+    //delete user in AD
+    public void deleteUser(String id){
+        graphClient.users(id)
+	.buildRequest()
+	.delete();
+    }
+
             //change accountEnabled state of a user
     public void changeActivate(User user, Boolean state){
         if(state == true)

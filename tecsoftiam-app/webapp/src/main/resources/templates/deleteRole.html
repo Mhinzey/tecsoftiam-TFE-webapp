@@ -1,0 +1,21 @@
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+   <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}" />
+   </head>
+<body>
+<div>
+    
+    <form action="#" th:action="@{/deleteRole(id=${user.id})}" method="post" th:object="${aduser}">
+    <h1>Delete role from user <span th:text="${user.displayName}"> </span></h1>
+    <label>Role(s):</label>
+
+<select name="rolesList"  id="rolesList"  th:field="*{roles}" multiple>
+    <option th:each="role : ${roles}" th:value="${role.roleTemplateId}" th:text="${role.displayName}"></option> 
+</select>
+<button type="submit">Register</button>    
+</form>
+</div>
+</body>
+</html>

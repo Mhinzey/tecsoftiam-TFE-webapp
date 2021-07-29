@@ -15,6 +15,12 @@
         <thead>
           <tr th:each="user : ${users}">
               <th colspan="2" th:text="${user.displayName}" ></th>>User details</th>
+              <form method="POST" th:action="@{/deleteUser(id=${user.id})}">
+                <button type="submit" name="submit" value="value" class="link-button">DELETE USER</button>
+            </form>
+            
+              <button  name="giveRoleb"  th:onclick="giveRole([[${user.id}]])" class="link-button">add roles</button>      
+            <button name="removeRoleb"  th:onclick="deleteRole([[${user.id}]])" class="link-button">remove roles</button>
           </tr>
       </thead>     
         
@@ -31,6 +37,7 @@
 <form th:action="@{/logout}" method="post">
     <input type="submit" value="Logout" />
 </form>
+
 
   </body>
 </html>

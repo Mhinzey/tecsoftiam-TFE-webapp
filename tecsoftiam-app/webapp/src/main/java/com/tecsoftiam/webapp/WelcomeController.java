@@ -1,18 +1,23 @@
 package com.tecsoftiam.webapp;
 
 import java.io.IOException;
+
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.microsoft.graph.models.DirectoryObject;
 import com.microsoft.graph.models.DirectoryRole;
+import com.microsoft.graph.models.Group;
 import com.microsoft.graph.models.User;
+
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,32 +33,8 @@ public class WelcomeController {
     
     UserRepository userRepo;
     // inject via application.properties
-    @Value("${welcome.message:test}")
-    private String message = "Hello World";
+  
 
-    @RequestMapping("/")
-    public String welcome(Map<String, Object> model) {
-        model.put("message", this.message);
-        return "welcome";
-    }
-    @GetMapping("/register")
-    public String showRegistrationForm(Model model) {
-        model.addAttribute("user", new AppUser());
-        
-        return "signup_form";
-    }
-    @PostMapping("/process_register")
-public String processRegister(AppUser user) {
-    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    String encodedPassword = passwordEncoder.encode(user.getPassword());
-    user.setPassword(encodedPassword);
-     
-    userRepo.save(user);
-     
-    return "register_success";
-    }
-
-    
    @GetMapping("/index")
    public String index(Model model) throws IOException {
       
@@ -93,13 +74,85 @@ public String processRegister(AppUser user) {
        model.addAttribute("role", role);
         return "roledetails";
     }
+    @GetMapping("/groups")
+    public String groups(Model model) throws IOException {
+        Graph msGraph= new Graph();
+        List<Group>  groups= msGraph.getGroups();
+       model.addAttribute("groups", groups);
+        return "groups";
+    }
  
 
-    @GetMapping("/welcome")
-    public String greeting(@RequestParam(name = "name", required = false, defaultValue = "World") String name,
-            Model model) {
-        model.addAttribute("name", name);
-        return "greeting";
+    @GetMapping("/createUser")
+    public String userForm(Model model) throws IOException {
+        adUser user = new adUser();
+        Graph msGraph= new Graph();
+        model.addAttribute("user", user);
+        List<DirectoryRole> roles= msGraph.getDirectoryRoles();
+        model.addAttribute("roles", roles);
+         
+        return "createUser";
+    }
+        @PostMapping("/createUser")
+    public String createUser(Model Model, @ModelAttribute("user") adUser user ) throws IOException {
+        Graph msGraph= new Graph();
+        String id;
+        msGraph.CreateUser(user.getDisplayName(), user.getNickName(), user.getMail(), user.getName(), user.getPassword());
+        id=msGraph.getAdUserByDP(user.getDisplayName()).id;
+        
+        for(int i=0 ; i<user.roles.size() ; i++){
+            msGraph.grantRole(user.roles.get(i), id);
+            System.out.println(user.roles.get(i));
+        }
+        return "index";
+    }
+
+    @PostMapping("/deleteUser")
+    public String deleteUser(@RequestParam Map<String, String> requestParams) throws IOException{
+        Graph msGraph= new Graph();
+        msGraph.deleteUser(requestParams.get("id"));
+        return "redirect:/user";
+    }
+
+    @GetMapping("/giveRole/{id}")
+    public String giveRole(@PathVariable(value = "id") String id ,Model model) throws IOException {
+        Graph msGraph= new Graph();
+        User user = msGraph.getAdUser(id);
+        adUser aduser= new adUser();
+        Set<DirectoryRole> roles= msGraph.NotHaveRoleList(id);
+        model.addAttribute("user", user);
+        model.addAttribute("roles", roles);
+        model.addAttribute("aduser", aduser);
+        return "giveRole";
+    }
+    @PostMapping("/giveRole{id}")
+    public String giveRoleP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,Model Model ) throws IOException {
+        Graph msGraph= new Graph();
+        String id= requestParams.get("id");
+        for(int i=0 ; i<user.roles.size() ; i++){
+            msGraph.grantRole(user.roles.get(i), id);
+        }
+        return "redirect:/users/"+id;
+    }
+    @GetMapping("/deleteRole/{id}")
+    public String deleteRole(@PathVariable(value = "id") String id ,Model model) throws IOException {
+        Graph msGraph= new Graph();
+        User user = msGraph.getAdUser(id);
+        adUser aduser= new adUser();
+        List<DirectoryRole> roles= msGraph.GetAllRoleFrom(id);
+        model.addAttribute("user", user);
+        model.addAttribute("roles", roles);
+        model.addAttribute("aduser", aduser);
+        return "deleteRole";
+    }
+    @PostMapping("/deleteRole{id}")
+    public String deleteRoleP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,Model Model ) throws IOException {
+        Graph msGraph= new Graph();
+        String id= requestParams.get("id");
+        for(int i=0 ; i<user.roles.size() ; i++){
+            msGraph.deleteRoleFrom(user.roles.get(i), id);
+        }
+        return "redirect:/users/"+id;
     }
 
 }

@@ -1,0 +1,32 @@
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+   <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}" />
+   </head>
+<body>
+<div>
+    <h1>User Registration</h1>
+    <form action="#" th:action="@{/createUser}" method="post" th:object="${user}">
+        <label>DisplayName:</label>
+        <input type="text" th:field="*{displayName}" /><br/>
+ 
+        <label>E-mail:</label>
+        <input type="text" th:field="*{mail}" /><br/>
+        <label>E-mail nick:</label>
+        <input type="text" th:field="*{nickName}" /><br/>
+ 
+        <label>Password:</label>
+        <input type="password" th:field="*{password}" /><br/>
+      
+    
+    <label>Role(s):</label>
+
+<select name="rolesList"  id="rolesList"  th:field="*{roles}" multiple>
+    <option th:each="role : ${roles}" th:value="${role.roleTemplateId}" th:text="${role.displayName}"></option> 
+</select> 
+ <button type="submit">Register</button>    
+</form>
+</div>
+</body>
+</html>
