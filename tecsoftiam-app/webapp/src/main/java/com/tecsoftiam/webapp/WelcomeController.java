@@ -111,7 +111,7 @@ public class WelcomeController {
     public String deleteUser(@RequestParam Map<String, String> requestParams) throws IOException{
         Graph msGraph= new Graph();
         msGraph.deleteUser(requestParams.get("id"));
-        return "redirect:/user";
+        return "redirect:/users";
     }
 
     @GetMapping("/giveRole/{id}")

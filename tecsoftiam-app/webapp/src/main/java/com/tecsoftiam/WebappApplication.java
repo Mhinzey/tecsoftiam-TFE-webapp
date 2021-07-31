@@ -73,8 +73,7 @@ public class WebappApplication extends SpringBootServletInitializer {
 		//db.insertAllDirectoryRoles(lst);
 		//db.matchRoles();
 		//graphtest.grantRole("88d8e3e3-8f55-4a1e-953a-9b9898b8876b", "ccfdd40e-23be-450e-bd6c-01aa7ce689a8");
-		 graphtest.NotHaveRoleList("ccfdd40e-23be-450e-bd6c-01aa7ce689a8");
-		
+	
 		SpringApplication.run(WebappApplication.class, args);
 
 	}
