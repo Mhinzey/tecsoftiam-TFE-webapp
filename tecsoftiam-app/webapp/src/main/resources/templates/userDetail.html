@@ -21,16 +21,25 @@
             
               <button  name="giveRoleb"  th:onclick="giveRole([[${user.id}]])" class="link-button">add roles</button>      
             <button name="removeRoleb"  th:onclick="deleteRole([[${user.id}]])" class="link-button">remove roles</button>
+            <button  name="giveGroupb"  th:onclick="giveGroup([[${user.id}]])" class="link-button">add groups</button>      
+            <button name="removeGroupb"  th:onclick="deleteGroup([[${user.id}]])" class="link-button">remove groups</button>
           </tr>
       </thead>     
         
          <tr>
-         <th> Member of:</th>
+         <th> Member of roles:</th>
          
          </tr>       
          <tr  th:each="role : ${roleList}" style="cursor: pointer" >
          <td th:text="${role.displayName}" ></td>
          </tr>
+         <tr>
+          <th> Member of groups:</th>
+          
+          </tr>       
+          <tr  th:each="group : ${groupList}" style="cursor: pointer" >
+          <td th:text="${group.displayName}" ></td>
+          </tr>
         </table>
 </div>
 <button name="IndexButton" onclick="window.location.href='/index'">Home</button>

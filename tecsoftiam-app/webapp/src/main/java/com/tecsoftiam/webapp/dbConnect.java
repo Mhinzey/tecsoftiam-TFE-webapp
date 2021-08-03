@@ -32,7 +32,7 @@ public class dbConnect {
     }
 
     private static void insertData(AppUser user, Connection connection) throws SQLException {
-        System.out.println("Insert data");
+      
         PreparedStatement insertStatement = connection
                 .prepareStatement("INSERT INTO users (id, description, details, done) VALUES (?, ?, ?, ?);");
 
@@ -195,6 +195,7 @@ public class dbConnect {
         }
         connection.close();
     }
+   
 
     public void matchRoles() throws SQLException, IOException{
         ResultSet set;
@@ -219,5 +220,33 @@ public class dbConnect {
             } 
         }            
         connection.close();
+    }
+    public List<scope> getScope() throws SQLException{
+        ResultSet set;
+        PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM scopes");
+        set=readStatement.executeQuery();
+        List<scope> list=new ArrayList<scope>();
+        while(set.next()){            
+            scope scope= new scope(set.getInt("id"),set.getString("tenantId"),set.getString("password"),set.getString("scopeName"));
+            list.add(scope);
+        } 
+        return list;
+    }
+    public void addScope(String tenantId, String password, String scopeName) throws SQLException{
+        PreparedStatement insertStatement = connection
+        .prepareStatement("INSERT INTO scopes (tenantId, password, scopeName) VALUES (?, ?, ?);");
+
+            insertStatement.setString(1,tenantId);
+            insertStatement.setString(2, password);
+            insertStatement.setString(3, scopeName);
+            insertStatement.executeUpdate();
+            connection.close();
+    }
+
+    public void deleteScope(String scopeName) throws SQLException{
+        PreparedStatement preparedStatement = connection
+        .prepareStatement("DELETE FROM scopes WHERE scopeName = ?");
+        preparedStatement.setString(1, scopeName);
+        preparedStatement.executeUpdate();
     }
 }

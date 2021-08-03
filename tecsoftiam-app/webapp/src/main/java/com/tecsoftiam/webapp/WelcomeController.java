@@ -41,7 +41,6 @@ public class WelcomeController {
        return "index";
    }
 
-
    @GetMapping("/users/{id}")
     public String userdetails(@PathVariable(value = "id") String userId ,Model model ) throws IOException {
         Graph msGraph= new Graph();
@@ -49,8 +48,11 @@ public class WelcomeController {
        model.addAttribute("users", users);
        List<DirectoryRole> roles= msGraph.GetAllRoleFrom(userId);
        model.addAttribute("roleList", roles);
+       List<Group> groups= msGraph.listGroupOf(userId);
+       model.addAttribute("groupList", groups);
         return "userDetail";
     }
+
    @GetMapping("/users")
     public String user(Model model) throws IOException {
         Graph msGraph= new Graph();
@@ -58,6 +60,7 @@ public class WelcomeController {
        model.addAttribute("users", users);
         return "user";
     }
+
     @GetMapping("/roles")
     public String roles(Model model) throws IOException {
         Graph msGraph= new Graph();
@@ -65,6 +68,7 @@ public class WelcomeController {
        model.addAttribute("roles", roles);
         return "roles";
     }
+
     @GetMapping("/roles/{id}")
     public String rolesdetails(@PathVariable(value = "id") String templateId ,Model model ) throws IOException {
         Graph msGraph= new Graph();
@@ -74,12 +78,22 @@ public class WelcomeController {
        model.addAttribute("role", role);
         return "roledetails";
     }
+
     @GetMapping("/groups")
     public String groups(Model model) throws IOException {
         Graph msGraph= new Graph();
-        List<Group>  groups= msGraph.getGroups();
+        List<Group>  groups= msGraph.getGroupsList();
        model.addAttribute("groups", groups);
         return "groups";
+    }
+    @GetMapping("/groups/{id}")
+    public String groupsDetails(@PathVariable(value = "id") String groupId ,Model model ) throws IOException {
+        Graph msGraph= new Graph();
+       List<DirectoryObject> lst= msGraph.usersInGroup(groupId);
+       Group group= msGraph.groupDetail(groupId);
+       model.addAttribute("users", lst);
+       model.addAttribute("group", group);
+        return "groupDetails";
     }
  
 
@@ -93,6 +107,7 @@ public class WelcomeController {
          
         return "createUser";
     }
+
         @PostMapping("/createUser")
     public String createUser(Model Model, @ModelAttribute("user") adUser user ) throws IOException {
         Graph msGraph= new Graph();
@@ -102,7 +117,11 @@ public class WelcomeController {
         
         for(int i=0 ; i<user.roles.size() ; i++){
             msGraph.grantRole(user.roles.get(i), id);
-            System.out.println(user.roles.get(i));
+         
+        }
+        for(int i=0 ; i<user.groups.size() ; i++){
+            msGraph.addToGroup( id, user.groups.get(i));
+         
         }
         return "index";
     }
@@ -110,8 +129,50 @@ public class WelcomeController {
     @PostMapping("/deleteUser")
     public String deleteUser(@RequestParam Map<String, String> requestParams) throws IOException{
         Graph msGraph= new Graph();
+
         msGraph.deleteUser(requestParams.get("id"));
         return "redirect:/users";
+    }
+
+    @GetMapping("/giveGroup/{id}")
+    public String giveGroup(@PathVariable(value = "id") String id ,Model model) throws IOException {
+        Graph msGraph= new Graph();
+        User user = msGraph.getAdUser(id);
+        adUser aduser= new adUser();
+        Set<Group> groups= msGraph.NotHaveGroupList(id);
+        model.addAttribute("user", user);
+        model.addAttribute("groups", groups);
+        model.addAttribute("aduser", aduser);
+        return "giveGroup";
+    }
+    @PostMapping("/giveGroup{id}")
+    public String giveGroupP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,Model Model ) throws IOException {
+        Graph msGraph= new Graph();
+        String id= requestParams.get("id");
+        for(int i=0 ; i<user.groups.size() ; i++){
+            msGraph.addToGroup( id, user.groups.get(i));
+        }
+        return "redirect:/users/"+id;
+    }
+    @GetMapping("/deleteGroup/{id}")
+    public String deleteGroup(@PathVariable(value = "id") String id ,Model model) throws IOException {
+        Graph msGraph= new Graph();
+        User user = msGraph.getAdUser(id);
+        adUser aduser= new adUser();
+        List<Group> groups= msGraph.listGroupOf(id);
+        model.addAttribute("user", user);
+        model.addAttribute("groups", groups);
+        model.addAttribute("aduser", aduser);
+        return "deleteGroup";
+    }
+    @PostMapping("/deleteGroup{id}")
+    public String deleteGroupP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,Model Model ) throws IOException {
+        Graph msGraph= new Graph();
+        String id= requestParams.get("id");
+        for(int i=0 ; i<user.groups.size() ; i++){
+            msGraph.deleteFromGroup(id,user.groups.get(i));
+        }
+        return "redirect:/users/"+id;
     }
 
     @GetMapping("/giveRole/{id}")

@@ -51,6 +51,7 @@ import javassist.expr.NewArray;
 
 import com.microsoft.graph.requests.DirectoryAuditCollectionPage;
 import com.microsoft.graph.requests.DirectoryObjectCollectionWithReferencesPage;
+import com.microsoft.graph.requests.DirectoryObjectGetMemberGroupsCollectionPage;
 import com.microsoft.graph.requests.DirectoryRoleCollectionPage;
 import com.microsoft.graph.requests.EventCollectionPage;
 import com.microsoft.graph.requests.EventCollectionRequestBuilder;
@@ -219,13 +220,16 @@ public class Graph {
             state=true;
             for(int j=0; j<hasRole.size();j++ ){
             roleB=hasRole.get(j);
+           
                 if(roleA.displayName.equals(roleB.displayName)){                
-                   // notHave.remove(roleB);
+                   
                    state=false;
                 }
-                if(state==true){
-                    notHave.add(roleA);
-                }
+                
+            }
+            if(state==true){
+                    
+                notHave.add(roleA);
             }
         }
     }
@@ -292,6 +296,7 @@ public class Graph {
             }
     //delete user in AD
     public void deleteUser(String id){
+        deleteAllRolesFrom(id);
         graphClient.users(id)
 	.buildRequest()
 	.delete();
@@ -317,10 +322,20 @@ public class Graph {
         graphClient.directoryRoles("roleTemplateId="+template).members(idOf).reference()
 	.buildRequest()
 	.delete();
+    
 
     }
+    //delete all roles from a user (used for user delete)
+    public void deleteAllRolesFrom(String id){
+        List<DirectoryRole> list= GetAllRoleFrom(id);
+        DirectoryRole role;
+        for(int i=0 ; i<list.size() ;i++){
+            role=list.get(i);
+            deleteRoleFrom(role.roleTemplateId, id);
+        }
+    }
     //get a list of all groups
-    public List<Group> getGroups(){
+    public List<Group> getGroupsList(){
         GroupCollectionPage groups = graphClient.groups()
             .buildRequest()
             .get();
@@ -330,6 +345,28 @@ public class Graph {
             lst.addAll(groups.getCurrentPage());
           }
         return lst;
+    }
+    public List<DirectoryObject> usersInGroup(String id){
+        DirectoryObjectCollectionWithReferencesPage members = graphClient.groups(id).members()
+            .buildRequest()
+            .get();
+        List<DirectoryObject> users = members.getCurrentPage();
+
+        while(members.getNextPage() != null){
+            members = members.getNextPage() .buildRequest().get();
+            users.addAll(members.getCurrentPage());
+        }
+      
+        return users;
+
+    }
+    //return group details from ID
+    public Group groupDetail(String id){
+                
+        return graphClient.groups(id)
+        .buildRequest()
+        .get();
+
     }
 
     //add user to a group
@@ -351,17 +388,68 @@ public class Graph {
 	.delete();
     }
 
-    //gte group list of a user/role
-    public void groupsOf(String id){
+    //get group list of a user/role as string ID list
+    public List<String> groupsOf(String id){
         Boolean securityEnabledOnly = true;
-
-        graphClient.directoryObjects(id)
+       
+        DirectoryObjectGetMemberGroupsCollectionPage groups=  graphClient.directoryObjects(id)
             .getMemberGroups(DirectoryObjectGetMemberGroupsParameterSet
                 .newBuilder()
                 .withSecurityEnabledOnly(securityEnabledOnly)
                 .build())
             .buildRequest()
             .post();
+        List<String> grpList=groups.getCurrentPage();
+        
+            return grpList;
 
+    }
+    //return a list of groups a member is part of
+    public List<Group> listGroupOf(String id){
+        List<String> strList= groupsOf(id);
+        List<Group> listGroup= new ArrayList<Group>();
+        for(int i=0; i<strList.size();i++){
+            listGroup.add(groupDetail(strList.get(i)));
+        }
+        return listGroup;
+    }
+
+    //return a list of groups a member is not a part of
+    public Set<Group> NotHaveGroupList(String id){
+     
+        List<Group> hasGroup,allGroups= new ArrayList<Group>(); 
+        hasGroup= listGroupOf(id);
+        allGroups= getGroupsList();
+        List<Group> notHave= new ArrayList<Group>();
+
+        Group roleA, roleB;
+        boolean state;
+        Set<Group> set= new HashSet<Group>();
+        if(hasGroup.size()==0) notHave=allGroups;
+       
+        else{
+        for(int i=0; i<allGroups.size();i++){
+            roleA= allGroups.get(i);
+            state=true;
+            for(int j=0; j<hasGroup.size();j++ ){
+                state=true;
+                
+            roleB=hasGroup.get(j);
+                if((roleA.displayName.equals(roleB.displayName))){                
+               
+                   state=false;
+                }
+                
+            }
+            if(state==true){
+                    notHave.add(roleA);
+                }
+        }
+    }
+    for (Group r : notHave)
+        set.add(r);
+        
+    
+        return set;
     }
 }
