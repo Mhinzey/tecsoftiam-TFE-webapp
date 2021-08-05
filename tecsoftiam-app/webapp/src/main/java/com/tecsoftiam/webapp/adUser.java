@@ -13,6 +13,7 @@ public class adUser {
 
 
     List<String> roles;
+    List<String> groups;
     
     public adUser(){
 

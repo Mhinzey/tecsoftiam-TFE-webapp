@@ -25,6 +25,12 @@
 <select name="rolesList"  id="rolesList"  th:field="*{roles}" multiple>
     <option th:each="role : ${roles}" th:value="${role.roleTemplateId}" th:text="${role.displayName}"></option> 
 </select> 
+    
+<label>Group(s):</label>
+
+<select name="groupsList"  id="groupsList"  th:field="*{groups}" multiple>
+    <option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.displayName}"></option> 
+</select> 
  <button type="submit">Register</button>    
 </form>
 </div>

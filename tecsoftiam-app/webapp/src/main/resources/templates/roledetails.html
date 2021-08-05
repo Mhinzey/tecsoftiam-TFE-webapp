@@ -22,7 +22,22 @@
          <td th:text="${user.displayName}" ></td>
          </tr>
         </table>
-</div>
+      </div>
+      <div class="container">
+
+            <div th:if="${not #lists.isEmpty(groups)}"></div>
+          
+              <h2> Users list related to the role <span th:text="${role.displayName}"></span> </h2>
+          
+              <table class = "table table-striped">       
+              <tr>
+              <th> Group Name </th>
+              </tr>       
+              <tr th:each="group : ${groups}"  >
+              <td th:text="${group.displayName}" ></td>
+              </tr>
+              </table>
+      </div>
 <button name="IndexButton" onclick="window.location.href='/index'">Home</button>
 <form th:action="@{/logout}" method="post">
     <input type="submit" value="Logout" />

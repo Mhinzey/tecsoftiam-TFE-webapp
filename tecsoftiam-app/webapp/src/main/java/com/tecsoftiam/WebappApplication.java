@@ -62,18 +62,8 @@ public class WebappApplication extends SpringBootServletInitializer {
 	
 		//test to read into the db
 		dbConnect db = new dbConnect();
-		//AppUser user = new AppUser((long) 1, "oli", "test");
-		//db.insertCreatedDate();
-		//graphtest.AllAudit();
-		//List<User> lst= graphtest.getAdUserList();
-		//db.InsertMultipleUsers(lst);
-		//List<DirectoryAudit> liste= graphtest.getDirectoryAudits();
-		//db.insertAllLogs(liste);
-		//List<DirectoryRole> lst =graphtest.getDirectoryRoles();
-		//db.insertAllDirectoryRoles(lst);
-		//db.matchRoles();
-		//graphtest.grantRole("88d8e3e3-8f55-4a1e-953a-9b9898b8876b", "ccfdd40e-23be-450e-bd6c-01aa7ce689a8");
-	
+		//db.refreshDb();
+		
 		SpringApplication.run(WebappApplication.class, args);
 
 	}

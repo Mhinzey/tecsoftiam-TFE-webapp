@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * Controller for web app
  */
 @Controller
-public class WelcomeController {
+public class WebController {
 
     
     UserRepository userRepo;
@@ -49,6 +49,8 @@ public class WelcomeController {
        model.addAttribute("users", users);
        List<DirectoryRole> roles= msGraph.GetAllRoleFrom(userId);
        model.addAttribute("roleList", roles);
+       List<Group> group= msGraph.groupsOf(userId);
+       model.addAttribute("groupList", group);
         return "userDetail";
     }
    @GetMapping("/users")
@@ -90,7 +92,8 @@ public class WelcomeController {
         model.addAttribute("user", user);
         List<DirectoryRole> roles= msGraph.getDirectoryRoles();
         model.addAttribute("roles", roles);
-         
+        List<Group> groups= msGraph.getGroups();
+        model.addAttribute("groups", groups);
         return "createUser";
     }
         @PostMapping("/createUser")
@@ -102,7 +105,11 @@ public class WelcomeController {
         
         for(int i=0 ; i<user.roles.size() ; i++){
             msGraph.grantRole(user.roles.get(i), id);
-            System.out.println(user.roles.get(i));
+           
+        }
+        for(int i=0 ; i<user.groups.size() ; i++){
+            msGraph.addToGroup(id, user.groups.get(i));
+           
         }
         return "index";
     }
@@ -153,6 +160,10 @@ public class WelcomeController {
             msGraph.deleteRoleFrom(user.roles.get(i), id);
         }
         return "redirect:/users/"+id;
+    }
+    @GetMapping("/scope")
+    public String scopePage(){
+        return "";
     }
 
 }

@@ -51,6 +51,7 @@ import javassist.expr.NewArray;
 
 import com.microsoft.graph.requests.DirectoryAuditCollectionPage;
 import com.microsoft.graph.requests.DirectoryObjectCollectionWithReferencesPage;
+import com.microsoft.graph.requests.DirectoryObjectGetMemberGroupsCollectionPage;
 import com.microsoft.graph.requests.DirectoryRoleCollectionPage;
 import com.microsoft.graph.requests.EventCollectionPage;
 import com.microsoft.graph.requests.EventCollectionRequestBuilder;
@@ -171,11 +172,10 @@ public class Graph {
             members = members.getNextPage() .buildRequest().get();
             users.addAll(members.getCurrentPage());
         }
-        System.out.println(users.size());
         User usr;
         for(int i=0; i<users.size();i++){
             usr= (User)users.get(i);
-           // System.out.println("Role:" + usr.displayName);
+          
         }
         return users;
     }
@@ -332,6 +332,19 @@ public class Graph {
         return lst;
     }
 
+    //get a list of users from a group 
+    public List<DirectoryObject> membersOf(String id){
+            DirectoryObjectCollectionWithReferencesPage members = graphClient.groups(id).members()
+        .buildRequest()
+        .get();
+        List<DirectoryObject> users = members.getCurrentPage();
+        while(members.getNextPage() != null){
+            members = members.getNextPage() .buildRequest().get();
+            users.addAll(members.getCurrentPage());
+        }
+        return users;
+
+    }
     //add user to a group
     public void addToGroup(String userId, String groupid){
 
@@ -352,16 +365,37 @@ public class Graph {
     }
 
     //gte group list of a user/role
-    public void groupsOf(String id){
+    public List<Group> groupsOf(String id){
         Boolean securityEnabledOnly = true;
-
-        graphClient.directoryObjects(id)
+        List<Group> groupList=new ArrayList<Group>();
+        DirectoryObjectGetMemberGroupsCollectionPage groups= graphClient.directoryObjects(id)
             .getMemberGroups(DirectoryObjectGetMemberGroupsParameterSet
                 .newBuilder()
                 .withSecurityEnabledOnly(securityEnabledOnly)
                 .build())
             .buildRequest()
             .post();
+            List<String> grp = groups.getCurrentPage();
+            while(groups.getNextPage() != null){
+                groups = groups.getNextPage().buildRequest().post();
+                grp.addAll(groups.getCurrentPage());
+            }
+           for(int i=0; i<grp.size();i++){
+            Group group = graphClient.groups(grp.get(i))
+            .buildRequest()
+            .get();
+            groupList.add(group);
+        
+           }
+        return groupList;
 
     }
+    //restore object deleted from ad
+    public void restoreObject(String id){
+        graphClient.directory().deletedItems(id)
+        .restore()
+        .buildRequest()
+        .post();
+    }
+   
 }

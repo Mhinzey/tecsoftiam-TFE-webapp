@@ -15,6 +15,7 @@ import javax.servlet.jsp.jstl.sql.Result;
 import com.microsoft.graph.models.DirectoryAudit;
 import com.microsoft.graph.models.DirectoryObject;
 import com.microsoft.graph.models.DirectoryRole;
+import com.microsoft.graph.models.Group;
 import com.microsoft.graph.models.User;
 import com.tecsoftiam.WebappApplication;
 
@@ -26,15 +27,36 @@ public class dbConnect {
     final Properties properties = new Properties();
     //init app properties and db connection
     Connection connection;
+    private Properties oAuthProperties = new Properties();
+    String currentAD;
+    String tenant;
     public dbConnect() throws IOException, SQLException {
+        oAuthProperties.load(WebappApplication.class.getClassLoader().getResourceAsStream("oAuth.properties"));
         properties.load(WebappApplication.class.getClassLoader().getResourceAsStream("application.properties"));
         this.connection = DriverManager.getConnection(properties.getProperty("url"), properties);
+        this.tenant = oAuthProperties.getProperty("app.tenant");
+        this.currentAD = oAuthProperties.getProperty("app.scopename");
+      
+        
     }
-
+    //return current ad Scope name
+    private String getcurrentAd() throws SQLException{
+        ResultSet set;
+        PreparedStatement readStatement = connection.prepareStatement("SELECT scopeName FROM scopes where tenantId = ?");
+        readStatement.setString(1, currentAD); 
+        set=readStatement.executeQuery();               
+        return set.getString("scopeName");
+    }
+    //delete scope from db
+    private void deleteScope(String Name) throws SQLException{
+        PreparedStatement delete = connection.prepareStatement("DELETE from scopes where scopeName=?");
+        delete.setString(1, currentAD);
+        delete.executeUpdate();   
+    }
     private static void insertData(AppUser user, Connection connection) throws SQLException {
         System.out.println("Insert data");
         PreparedStatement insertStatement = connection
-                .prepareStatement("INSERT INTO users (id, description, details, done) VALUES (?, ?, ?, ?);");
+                .prepareStatement("INSERT INTO users (id, description, details, done) VALUES (?, ?, ?, ?) ;");
 
         insertStatement.setLong(1, user.getId());
         insertStatement.setString(2, user.getUsername());
@@ -45,7 +67,7 @@ public class dbConnect {
     }
 
   
-
+    //Read some data from db, was used for test purpose
     AppUser readData( ) throws SQLException {
         System.out.println("Read data");
         PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM users;");
@@ -63,9 +85,10 @@ public class dbConnect {
         return user;
     }
 
+    //insert ad user of current ad in db
     public  void Insertaduser(User user )throws SQLException{
         PreparedStatement insertStatement = connection
-                .prepareStatement("INSERT IGNORE INTO adusers ( mail ,givenName,surname ,employeeId ,displayName ,createdDateTime ,country ,id ,lastPasswordChangeDateTime) VALUES (?, ?, ?, ?,?, ?, ?, ?,?) ;");
+                .prepareStatement("INSERT IGNORE INTO adusers ( mail ,givenName,surname ,employeeId ,displayName ,createdDateTime ,country ,id ,lastPasswordChangeDateTime, scopeName ) VALUES (?, ?, ?, ?,?, ?, ?, ?,?,?);");
                  Timestamp passChanged  =null;
                 Timestamp createdAt=null;
                 if(user.lastPasswordChangeDateTime != null){
@@ -81,18 +104,19 @@ public class dbConnect {
                 insertStatement.setString(7, user.country);
                 insertStatement.setString(8, user.id);
                 insertStatement.setTimestamp(9, passChanged);
+                insertStatement.setString(10, currentAD);
 
                 insertStatement.executeUpdate();
                 
             }
-    
+    //insert a list of users in db
     public  void InsertMultipleUsers(List<User> list ) throws SQLException{
         
         for (int i = 0; i < list.size(); i++) {
             Insertaduser(list.get(i));
         }
     }
-
+  
     //return a List of String of users that has been added to the AD
     public List<String> HasBeenAdded(List<User> Currentlist) throws SQLException{
         List<String> newUsersId=new ArrayList<String>();
@@ -135,19 +159,56 @@ public class dbConnect {
         connection.close();
         return removed;
     }
-
+    //Detect if a user has been added to a group
+    public List<String> addedToGroup(String id) throws SQLException{
+        ResultSet set;
+        List<String> added=new ArrayList<String>();
+        List<String> indb=new ArrayList<String>();
+        PreparedStatement readStatement = connection.prepareStatement("SELECT adusers.displayName FROM adgroup JOIN usergroup ON adgroup.id=usergroup.groupid JOIN adusers ON usergroup.userid = adusers.id where adgroup.scopeName =?  ");
+        readStatement.setString(1, currentAD); 
+        set=readStatement.executeQuery();
+        while(set.next()){            
+            indb.add(set.getString("displayName"));
+               
+          }  
+        return indb;
+    }
+    //Insert a role in the db
     public void InsertRoleInDb(DirectoryRole role) throws SQLException{
         PreparedStatement insertStatement = connection
-                .prepareStatement("INSERT IGNORE INTO adrole ( displayName, description, adId, roleTemplateId ) VALUES (?, ?, ?, ?) ;");
+                .prepareStatement("INSERT IGNORE INTO adrole ( displayName, description, adId, roleTemplateId, scopeName ) VALUES (?, ?, ?, ?, ?) ;");
                 
                 insertStatement.setString(1, role.displayName);
                 insertStatement.setString(2, role.description);
                 insertStatement.setString(3, role.id);
                 insertStatement.setString(4, role.roleTemplateId);
+                insertStatement.setString(5, currentAD);
                 insertStatement.executeUpdate();
                 
     }
-
+    //insert a group of the current ad in the db
+    public void InsertGroupInDb(Group group) throws SQLException{
+        PreparedStatement insertStatement = connection
+        .prepareStatement("INSERT IGNORE INTO adgroup ( displayName, description, adId, mail, scopeName ) VALUES (?, ?, ?, ?, ?) ;");
+        
+        insertStatement.setString(1, group.displayName);
+        insertStatement.setString(2, group.description);
+        insertStatement.setString(3, group.id);
+        insertStatement.setString(4, group.mail);
+        insertStatement.setString(5, currentAD);
+        insertStatement.executeUpdate();
+        
+}
+    //Insert all groups of the current ad in the db
+    public void insertAllgroups(List<Group> lst) throws SQLException{
+        for (int i = 0; i < lst.size(); i++) {
+            
+            InsertGroupInDb(lst.get(i));
+            
+        }
+    }
+    
+    //insert all roles of the current ad in the db
     public void insertAllDirectoryRoles(List<DirectoryRole> lst) throws SQLException{
         for (int i = 0; i < lst.size(); i++) {
             InsertRoleInDb(lst.get(i));
@@ -155,24 +216,27 @@ public class dbConnect {
     }
 
     
-    
+    //insert user logs of current ad in the db
     public void insertUserLogs(DirectoryAudit audit) throws ParseException, SQLException{
         PreparedStatement insertStatement = connection
-        .prepareStatement("INSERT INTO useraddlogs ( date, userId, targetId ) VALUES (?, ?, ?) ");
+        .prepareStatement("INSERT INTO useraddlogs ( date, userId, targetId, scopeName ) VALUES (?, ?, ?,?) ");
         LocalDate localDate=audit.activityDateTime.toLocalDate();
         System.out.println(java.sql.Date.valueOf(localDate).toString()+"/"+audit.initiatedBy.user.id+"/"+audit.targetResources.get(0).id  );
         insertStatement.setDate(1,  java.sql.Date.valueOf(localDate));
         insertStatement.setString(2, audit.initiatedBy.user.id);
         insertStatement.setString(3, audit.targetResources.get(0).id);
+        insertStatement.setString(4, currentAD);
         insertStatement.executeUpdate();
         //connection.close();
         
     }
+    //insert all logs of the current ad in the db
     public void insertAllLogs(List<DirectoryAudit> lst) throws ParseException, SQLException{
         for (int i = 0; i < lst.size(); i++) {
             insertUserLogs(lst.get(i));
         }
     }
+    //insert all created date of current ad users in the db
     public void insertCreatedDate() throws SQLException{
         Map<String, Date> hmap = new HashMap<String, Date>();
         ResultSet set;
@@ -196,6 +260,7 @@ public class dbConnect {
         connection.close();
     }
 
+    //match roles with users
     public void matchRoles() throws SQLException, IOException{
         ResultSet set;
         List<String> rolesTemplates= new ArrayList<String>();
@@ -206,18 +271,79 @@ public class dbConnect {
             rolesTemplates.add(set.getString("roleTemplateId"));          
           } 
          for(int i = 0; i < rolesTemplates.size(); i++){
-             System.out.println(rolesTemplates.get(i));
             List<DirectoryObject> lst= graph.getUserRoles(rolesTemplates.get(i));
             
             for(int j = 0; j < lst.size(); j++){
                 PreparedStatement insertStatement = connection
-                      .prepareStatement("INSERT INTO roleuser ( roleTemplateId, userId ) VALUES (?,?) ");
+                      .prepareStatement("INSERT INTO roleuser ( roleTemplateId, userId ,scopeName) VALUES (?,?,?) ");
                 insertStatement.setString(1,rolesTemplates.get(i) );
                 insertStatement.setString(2, lst.get(j).id);
+                insertStatement.setString(3, currentAD);
                 insertStatement.executeUpdate();
                 
             } 
         }            
         connection.close();
+    }
+    //match group with users
+    public void matchGroups() throws IOException, SQLException{
+        Graph graph=new Graph();
+        List<Group> groups=graph.getGroups();
+    
+        for(int i = 0; i < groups.size(); i++){
+            List<DirectoryObject> lst= graph.membersOf(groups.get(i).id);
+            
+            for(int j = 0; j < lst.size(); j++){
+                PreparedStatement insertStatement = connection
+                      .prepareStatement("INSERT INTO usergroup ( groupid, userid ,scopeName) VALUES (?,?,?) ");
+                insertStatement.setString(1,groups.get(i).id );
+                insertStatement.setString(2, lst.get(j).id);
+                insertStatement.setString(3, currentAD);
+                insertStatement.executeUpdate();
+                
+            } 
+        }     
+
+    }
+    public void Flushadgroup() throws SQLException{
+        PreparedStatement delete = connection.prepareStatement("DELETE from adgroup where scopeName=?");
+        delete.setString(1, currentAD);
+        delete.executeUpdate();   
+    }
+    public void Flushadrole() throws SQLException{
+        PreparedStatement delete = connection.prepareStatement("DELETE from adrole where scopeName=?");
+        delete.setString(1, currentAD);
+        delete.executeUpdate();   
+    }
+    public void Flushadusers() throws SQLException{
+        PreparedStatement delete = connection.prepareStatement("DELETE from adusers where scopeName=?");
+        delete.setString(1, currentAD);
+        delete.executeUpdate();   
+    }
+    public void Flushroleuser() throws SQLException{
+        PreparedStatement delete = connection.prepareStatement("DELETE from roleuser where scopeName=?");
+        delete.setString(1, currentAD);
+        delete.executeUpdate();   
+    }
+    public void Flushgroupuser() throws SQLException{
+        PreparedStatement delete = connection.prepareStatement("DELETE from usergroup where scopeName=?");
+        delete.setString(1, currentAD);
+        delete.executeUpdate();   
+    }
+
+    //empty the olds data from db and add the actualised ones (used after a admin validation)
+    public void refreshDb() throws SQLException, IOException{
+        Flushroleuser();
+        Flushgroupuser();
+        Flushadgroup();
+        Flushadrole();
+        Flushadusers();
+        
+        Graph graph=new Graph();
+        InsertMultipleUsers(graph.getAdUserList());
+        insertAllDirectoryRoles(graph.getDirectoryRoles());
+        insertAllgroups(graph.getGroups());
+        matchGroups();
+        matchRoles();
     }
 }
