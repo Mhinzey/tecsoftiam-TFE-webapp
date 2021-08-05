@@ -9,3 +9,10 @@ function giveRole(value) {
 function deleteRole(value) {
     location.href = '/deleteRole/'+ value;
 }
+function giveGroup(value) {
+    location.href = '/giveGroup/'+ value;
+}
+
+function deleteGroup(value) {
+    location.href = '/deleteGroup/'+ value;
+}

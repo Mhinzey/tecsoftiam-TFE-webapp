@@ -219,13 +219,16 @@ public class Graph {
             state=true;
             for(int j=0; j<hasRole.size();j++ ){
             roleB=hasRole.get(j);
+           
                 if(roleA.displayName.equals(roleB.displayName)){                
-                   // notHave.remove(roleB);
+                   
                    state=false;
                 }
-                if(state==true){
-                    notHave.add(roleA);
-                }
+                
+            }
+            if(state==true){
+                    
+                notHave.add(roleA);
             }
         }
     }
@@ -292,6 +295,7 @@ public class Graph {
             }
     //delete user in AD
     public void deleteUser(String id){
+        deleteAllRolesFrom(id);
         graphClient.users(id)
 	.buildRequest()
 	.delete();
@@ -317,10 +321,20 @@ public class Graph {
         graphClient.directoryRoles("roleTemplateId="+template).members(idOf).reference()
 	.buildRequest()
 	.delete();
+    
 
     }
+    //delete all roles from a user (used for user delete)
+    public void deleteAllRolesFrom(String id){
+        List<DirectoryRole> list= GetAllRoleFrom(id);
+        DirectoryRole role;
+        for(int i=0 ; i<list.size() ;i++){
+            role=list.get(i);
+            deleteRoleFrom(role.roleTemplateId, id);
+        }
+    }
     //get a list of all groups
-    public List<Group> getGroups(){
+    public List<Group> getGroupsList(){
         GroupCollectionPage groups = graphClient.groups()
             .buildRequest()
             .get();
@@ -330,6 +344,28 @@ public class Graph {
             lst.addAll(groups.getCurrentPage());
           }
         return lst;
+    }
+    public List<DirectoryObject> usersInGroup(String id){
+        DirectoryObjectCollectionWithReferencesPage members = graphClient.groups(id).members()
+            .buildRequest()
+            .get();
+        List<DirectoryObject> users = members.getCurrentPage();
+
+        while(members.getNextPage() != null){
+            members = members.getNextPage() .buildRequest().get();
+            users.addAll(members.getCurrentPage());
+        }
+      
+        return users;
+
+    }
+    //return group details from ID
+    public Group groupDetail(String id){
+                
+        return graphClient.groups(id)
+        .buildRequest()
+        .get();
+
     }
 
     //get a list of users from a group 
@@ -388,7 +424,45 @@ public class Graph {
         
            }
         return groupList;
+    }
 
+    //return a list of groups a member is not a part of
+    public Set<Group> NotHaveGroupList(String id){
+     
+        List<Group> hasGroup,allGroups= new ArrayList<Group>(); 
+        hasGroup= groupsOf(id);
+        allGroups= getGroupsList();
+        List<Group> notHave= new ArrayList<Group>();
+
+        Group roleA, roleB;
+        boolean state;
+        Set<Group> set= new HashSet<Group>();
+        if(hasGroup.size()==0) notHave=allGroups;
+       
+        else{
+        for(int i=0; i<allGroups.size();i++){
+            roleA= allGroups.get(i);
+            state=true;
+            for(int j=0; j<hasGroup.size();j++ ){
+                state=true;
+                
+            roleB=hasGroup.get(j);
+                if((roleA.displayName.equals(roleB.displayName))){                
+               
+                   state=false;
+                }
+                
+            }
+            if(state==true){
+                    notHave.add(roleA);
+                }
+        }
+    }
+    for (Group r : notHave)
+        set.add(r);
+        
+    
+        return set;
     }
     //restore object deleted from ad
     public void restoreObject(String id){

@@ -26,6 +26,15 @@ public class adUser {
         this.Name=name;
         this.roles=roles;
     }
+    public adUser(String displayString, String mail, String passwString, String name, List<String> roles, List<String> groups){
+        this.displayName=displayString;
+        this.nickName=displayString;
+        this.mail=mail;
+        this.password=passwString;
+        this.Name=name;
+        this.roles=roles;
+        this.groups=groups;
+    }
         public String getNickName() {
         return this.nickName;
     }
@@ -71,5 +80,13 @@ public class adUser {
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
+    } 
+    public List<String> getGroups() {
+        return this.groups;
     }
+
+    public void setGroups(List<String> groups) {
+        this.groups = groups;
+    }
+
 }

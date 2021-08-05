@@ -47,14 +47,9 @@ public class dbConnect {
         set=readStatement.executeQuery();               
         return set.getString("scopeName");
     }
-    //delete scope from db
-    private void deleteScope(String Name) throws SQLException{
-        PreparedStatement delete = connection.prepareStatement("DELETE from scopes where scopeName=?");
-        delete.setString(1, currentAD);
-        delete.executeUpdate();   
-    }
+  
     private static void insertData(AppUser user, Connection connection) throws SQLException {
-        System.out.println("Insert data");
+      
         PreparedStatement insertStatement = connection
                 .prepareStatement("INSERT INTO users (id, description, details, done) VALUES (?, ?, ?, ?) ;");
 
@@ -259,6 +254,7 @@ public class dbConnect {
         }
         connection.close();
     }
+   
 
     //match roles with users
     public void matchRoles() throws SQLException, IOException{
@@ -288,7 +284,7 @@ public class dbConnect {
     //match group with users
     public void matchGroups() throws IOException, SQLException{
         Graph graph=new Graph();
-        List<Group> groups=graph.getGroups();
+        List<Group> groups=graph.getGroupsList();
     
         for(int i = 0; i < groups.size(); i++){
             List<DirectoryObject> lst= graph.membersOf(groups.get(i).id);
@@ -342,8 +338,36 @@ public class dbConnect {
         Graph graph=new Graph();
         InsertMultipleUsers(graph.getAdUserList());
         insertAllDirectoryRoles(graph.getDirectoryRoles());
-        insertAllgroups(graph.getGroups());
+        insertAllgroups(graph.getGroupsList());
         matchGroups();
         matchRoles();
+    }
+    public List<scope> getScope() throws SQLException{
+        ResultSet set;
+        PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM scopes");
+        set=readStatement.executeQuery();
+        List<scope> list=new ArrayList<scope>();
+        while(set.next()){            
+            scope scope= new scope(set.getInt("id"),set.getString("tenantId"),set.getString("password"),set.getString("scopeName"));
+            list.add(scope);
+        } 
+        return list;
+    }
+    public void addScope(String tenantId, String password, String scopeName) throws SQLException{
+        PreparedStatement insertStatement = connection
+        .prepareStatement("INSERT INTO scopes (tenantId, password, scopeName) VALUES (?, ?, ?);");
+
+            insertStatement.setString(1,tenantId);
+            insertStatement.setString(2, password);
+            insertStatement.setString(3, scopeName);
+            insertStatement.executeUpdate();
+            connection.close();
+    }
+
+    public void deleteScope(String scopeName) throws SQLException{
+        PreparedStatement preparedStatement = connection
+        .prepareStatement("DELETE FROM scopes WHERE scopeName = ?");
+        preparedStatement.setString(1, scopeName);
+        preparedStatement.executeUpdate();
     }
 }
