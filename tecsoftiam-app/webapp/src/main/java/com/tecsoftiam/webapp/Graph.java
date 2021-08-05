@@ -75,14 +75,18 @@ public class Graph {
     private final String tenant;
     private LinkedList<Option> requestOptions = new LinkedList<Option>();
     private GraphServiceClient graphclient;
+    private Scope scope;
 
     //initalize oAuth properties
     public Graph() throws IOException {
+        scope= new Scope();
         oAuthProperties.load(WebappApplication.class.getClassLoader().getResourceAsStream("oAuth.properties"));
         this.scopes = Arrays.asList(oAuthProperties.getProperty("app.scopes").split(","));
         this.clientId = oAuthProperties.getProperty("app.id");
-        this.clientSecret = oAuthProperties.getProperty("app.secret");
-        this.tenant = oAuthProperties.getProperty("app.tenant");
+        this.clientSecret = scope.getPassword();
+        this.tenant = scope.getTenantId();
+   
+        initializeGraphAuth();
     }
     //initalisiz Authenthification and token provider
     public void initializeGraphAuth() {

@@ -6,13 +6,15 @@
    <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}" />
    </head>
   <body>
-    <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]]</h3>
+    <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]] <small> Current scope is:  <span th:text="${scopeName}" ></span></small></h3>
+
     <div class="container">
 
       <button name="userInfo" onclick="window.location.href='/users'">Informations utilisateurs</button>
       <button name="roleInfo" onclick="window.location.href='/roles'">Informations roles</button>
       <button name="groupInfo" onclick="window.location.href='/groups'">Informations groupes</button>
-      <button name="changes" onclick="window.location.href='/changes'">Changements dans l'AD</button>
+      <button name="scopeSelect" onclick="window.location.href='/scopes'">Scope selection</button>
+      <button name="changes" onclick="window.location.href='/adChanges'">Changements dans l'AD</button>
      
 </div>
 <button name="IndexButton" onclick="window.location.href='/index'">Home</button>

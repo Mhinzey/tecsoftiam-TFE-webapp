@@ -1,11 +1,13 @@
 package com.tecsoftiam.webapp;
 
 import java.io.IOException;
-
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.azure.core.annotation.Post;
 import com.microsoft.graph.models.DirectoryObject;
 import com.microsoft.graph.models.DirectoryRole;
 import com.microsoft.graph.models.Group;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,7 +40,8 @@ public class WebController {
 
    @GetMapping("/index")
    public String index(Model model) throws IOException {
-      
+       Scope scope=new Scope();
+      model.addAttribute("scopeName", scope.getScopeName());
        return "index";
    }
 
@@ -216,9 +220,57 @@ public class WebController {
         }
         return "redirect:/users/"+id;
     }
-    @GetMapping("/scope")
-    public String scopePage(){
-        return "";
+    @GetMapping("/scopes")
+    public String scopePage(Model model) throws IOException, SQLException{
+        dbConnect db= new dbConnect();
+        Scope scope=new Scope();
+        model.addAttribute("selectedScope", scope);
+        List<Scope> scopeList= db.getScopeList();
+        model.addAttribute("scopes", scopeList);
+        return "scopes";
     }
-
+    @PostMapping("/scopes")
+    public String scopePageP(Model Model, @ModelAttribute("selectedScope") Scope scope) throws IOException, SQLException{
+        
+        dbConnect db= new dbConnect();
+        Scope newScope=db.getScope(scope.getScopeName());
+        newScope.writeInFile();
+        return "redirect:/index";
+    }
+    @GetMapping("/addScope")
+    public String addScopeFrom(Model model) throws IOException{
+        Scope scope= new Scope(0);
+        model.addAttribute("scope", scope);
+        return "addScope";
+    }
+    @PostMapping("/addScope")
+    public String addScopeP(Model model, @ModelAttribute("scope") Scope scope) throws IOException, SQLException{   
+        dbConnect db= new dbConnect();
+        db.addScope(scope.getTenantId(), scope.getPassword(), scope.getScopeName());
+        return "redirect:/scopes";
+    }
+    @GetMapping("/adChanges")
+    public String adChanges(Model model) throws IOException, SQLException{
+       changeDetect detect=new changeDetect();
+       List<adChanges> changes= new ArrayList<adChanges>();
+       changes= detect.changesList();
+       changesWrapper wrap=new changesWrapper();
+       wrap.setChangesList(changes);
+        model.addAttribute("wrapper", wrap);
+        return "adChanges";
+    }
+    @PostMapping("/adChanges")
+    public String adChangesP(Model model ,@ModelAttribute("wrapper") changesWrapper Viewlist, BindingResult bindingResult) throws IOException, SQLException{
+        changeDetect detect=new changeDetect();
+        List<adChanges> list=new ArrayList<adChanges>();
+        list= Viewlist.getChangesList();
+        System.out.println(list.size());
+        for(int i=0;i<list.size();i++){
+            System.out.println(list.get(i).getRefused());
+            System.out.println(list.get(i).getCible());
+            System.out.println(list.get(i).getType());
+        }
+        //detect.applyChanges(list);
+        return "redirect:/adChanges";
+    }
 }

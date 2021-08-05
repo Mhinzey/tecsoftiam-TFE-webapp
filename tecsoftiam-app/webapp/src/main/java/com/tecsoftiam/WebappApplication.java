@@ -53,17 +53,10 @@ public class WebappApplication extends SpringBootServletInitializer {
 	}
 
 	public static void main(String[] args) throws IOException, SQLException, ParseException {
-		final Properties properties = new Properties();
-		Graph graphtest = new Graph();
-		graphtest.initializeGraphAuth();
-		
-		// graphtest.getSubscriptionsList();
 
-	
-		//test to read into the db
+		Graph graphtest = new Graph();
 		dbConnect db = new dbConnect();
-		//db.refreshDb();
-		
+
 		SpringApplication.run(WebappApplication.class, args);
 
 	}

@@ -1,0 +1,23 @@
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+   <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}" />
+   </head>
+<body>
+<div>
+    <h1>User Registration</h1>
+    <form action="#" th:action="@{/addScope}" method="post" th:object="${scope}">
+        <label>ScopeName:</label>
+        <input type="text" th:field="*{scopeName}" /><br/>
+ 
+        <label>tenantId:</label>
+        <input type="text" th:field="*{tenantId}" /><br/>
+        <label>Password:</label>
+        <input type="text" th:field="*{password}" /><br/>
+
+ <button type="submit">Register</button>    
+</form>
+</div>
+</body>
+</html>

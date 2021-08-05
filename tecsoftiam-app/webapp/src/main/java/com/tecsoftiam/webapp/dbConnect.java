@@ -113,26 +113,29 @@ public class dbConnect {
     }
   
     //return a List of String of users that has been added to the AD
-    public List<String> HasBeenAdded(List<User> Currentlist) throws SQLException{
+    public List<String> HasBeenAdded() throws SQLException, IOException{ 
+        Graph graphtest = new Graph();
+        List<User> currentList = graphtest.getAdUserList();
         List<String> newUsersId=new ArrayList<String>();
         ResultSet set;
-        for (int i = 0; i < Currentlist.size(); i++) {
-            String userId= Currentlist.get(i).id;
+        for (int i = 0; i < currentList.size(); i++) {
+            String userId= currentList.get(i).id;
             PreparedStatement readStatement = connection.prepareStatement("SELECT displayName FROM adusers where id = ?");
             readStatement.setString(1, userId); 
-            set=readStatement.executeQuery();                  
+            set=readStatement.executeQuery();   
+                   
             if(!set.next()){
-                 
-                newUsersId.add(Currentlist.get(i).displayName);
+              
+                newUsersId.add(currentList.get(i).displayName);
             }
         }
-        connection.close();
+        
         return newUsersId;
     }
     //Return a list of (String) user suppressed from the AD
     public List<String> Suppressed() throws SQLException, IOException{
         Graph graphtest = new Graph();
-		graphtest.initializeGraphAuth();
+	
         ResultSet set;
         List <User> usrlist=graphtest.getAdUserList();
         List <String> adUsers=new ArrayList<String>();
@@ -342,16 +345,34 @@ public class dbConnect {
         matchGroups();
         matchRoles();
     }
-    public List<scope> getScope() throws SQLException{
+    public List<Scope> getScopeList() throws SQLException{
         ResultSet set;
         PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM scopes");
         set=readStatement.executeQuery();
-        List<scope> list=new ArrayList<scope>();
+        List<Scope> list=new ArrayList<Scope>();
         while(set.next()){            
-            scope scope= new scope(set.getInt("id"),set.getString("tenantId"),set.getString("password"),set.getString("scopeName"));
+            Scope scope= new Scope(set.getInt("id"),set.getString("tenantId"),set.getString("password"),set.getString("scopeName"));
             list.add(scope);
         } 
         return list;
+    }
+    //return a scope from scopeName
+    public Scope getScope(String name) throws SQLException, IOException{
+        ResultSet set;
+        Scope scope=new Scope();
+        PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM scopes where scopeName=?");
+        readStatement.setString(1, name);
+        set=readStatement.executeQuery();
+        while(set.next())
+        {
+          scope.setId(set.getInt("id"));
+          scope.setTenantId(set.getString("tenantId"));
+          scope.setPassword(set.getString("password"));
+          scope.setScopeName(set.getString("scopename"));
+        }
+         
+        return scope;
+
     }
     public void addScope(String tenantId, String password, String scopeName) throws SQLException{
         PreparedStatement insertStatement = connection
