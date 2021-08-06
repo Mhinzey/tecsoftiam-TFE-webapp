@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.microsoft.graph.models.User;
+
 public class changeDetect {
 
 
@@ -36,12 +38,14 @@ public class changeDetect {
         return list;
 
     }
-
-    public void applyChanges(List<adChanges> lst){
+    //apply all changes 
+    public void applyAllChanges(List<adChanges> lst) throws IOException, SQLException{
         for(int i=0;i<lst.size();i++){
-            System.out.print(lst.get(i).getRefused());
+            adChanges current=lst.get(i);
+            current.applyChange();
+            }
         }
     }
-}
+
 
   

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8"/>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-   <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}" />
+   <link rel="stylesheet"  type="text/css" th:href="@{static/css/bootstrap.min.css}" />
    </head>
   <body>
     <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]] <small> Current scope is:  <span th:text="${scopeName}" ></span></small></h3>

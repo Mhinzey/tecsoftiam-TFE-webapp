@@ -264,13 +264,7 @@ public class WebController {
         changeDetect detect=new changeDetect();
         List<adChanges> list=new ArrayList<adChanges>();
         list= Viewlist.getChangesList();
-        System.out.println(list.size());
-        for(int i=0;i<list.size();i++){
-            System.out.println(list.get(i).getRefused());
-            System.out.println(list.get(i).getCible());
-            System.out.println(list.get(i).getType());
-        }
-        //detect.applyChanges(list);
+        detect.applyAllChanges(list);
         return "redirect:/adChanges";
     }
 }

@@ -56,7 +56,6 @@ public class WebappApplication extends SpringBootServletInitializer {
 
 		Graph graphtest = new Graph();
 		dbConnect db = new dbConnect();
-
 		SpringApplication.run(WebappApplication.class, args);
 
 	}

@@ -331,7 +331,7 @@ public class dbConnect {
     }
 
     //empty the olds data from db and add the actualised ones (used after a admin validation)
-    public void refreshDb() throws SQLException, IOException{
+    public void refreshDb() throws SQLException, IOException, ParseException{
         Flushroleuser();
         Flushgroupuser();
         Flushadgroup();
@@ -344,7 +344,9 @@ public class dbConnect {
         insertAllgroups(graph.getGroupsList());
         matchGroups();
         matchRoles();
+        insertAllLogs(graph.getDirectoryAudits());
     }
+    //get a list of scopes
     public List<Scope> getScopeList() throws SQLException{
         ResultSet set;
         PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM scopes");
@@ -374,6 +376,7 @@ public class dbConnect {
         return scope;
 
     }
+    //ad scope in db
     public void addScope(String tenantId, String password, String scopeName) throws SQLException{
         PreparedStatement insertStatement = connection
         .prepareStatement("INSERT INTO scopes (tenantId, password, scopeName) VALUES (?, ?, ?);");
@@ -384,11 +387,40 @@ public class dbConnect {
             insertStatement.executeUpdate();
             connection.close();
     }
-
+    //delete scope from db
     public void deleteScope(String scopeName) throws SQLException{
         PreparedStatement preparedStatement = connection
         .prepareStatement("DELETE FROM scopes WHERE scopeName = ?");
         preparedStatement.setString(1, scopeName);
         preparedStatement.executeUpdate();
+    }
+    //hget user id from user name
+    public String getUserId(String name) throws SQLException{
+        ResultSet set;
+        String id=null;
+        PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM adusers where displayName=? and scopeName=?");
+        readStatement.setString(1, name);
+        readStatement.setString(2, currentAD);
+        set=readStatement.executeQuery();
+        while(set.next())
+        {
+          id=set.getString("id");
+      
+        }
+        if(id==null) return "erreur no id found";
+        return id;
+    }
+    public List<String> rolesOfUser(String name) throws SQLException{
+        ResultSet set;
+        List<String> indb=new ArrayList<String>();
+        PreparedStatement readStatement = connection.prepareStatement("SELECT adrole.roleTemplateId FROM adrole JOIN roleuser ON adrole.roleTemplateId=roleuser.roletemplateId JOIN adusers ON roleuser.userId = adusers.id where adrole.scopeName =? AND adusers.displayName=?  ");
+        readStatement.setString(1, currentAD); 
+        readStatement.setString(2, name); 
+        set=readStatement.executeQuery();
+        while(set.next()){            
+            indb.add(set.getString("roleTemplateId"));
+               
+          }  
+        return indb;
     }
 }

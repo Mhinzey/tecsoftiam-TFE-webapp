@@ -4,7 +4,7 @@
     <meta charset="UTF-8"/>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
     <script type="text/javascript" th:src="@{/static/js/changes.js}"></script>
-    <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/static/css/bootstrap.min.css}" />
   </head>
   <body>
     <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]]</h3>
@@ -26,8 +26,8 @@
       
          
          <tr  th:each="currentChange,stat : ${wrapper.changesList}"  >
-          <td  input type="text" readonly="readonly" th:field="*{changesList[__${stat.index}__].cible}" th:value="${currentChange.getCible()}" th:text="${currentChange.getCible()}" ></td>
-          <td input type="text" readonly="readonly" th:field="*{changesList[__${stat.index}__].type}" th:value="${currentChange.getType()}" th:text="${currentChange.getType()}"></td>
+          <td> <input  type="hidden" readonly="readonly"  th:field="*{changesList[__${stat.index}__].cible}" th:value="${currentChange.getCible()}" th:text="${currentChange.getCible()}" /></td>
+          <td> <input  type="hidden" readonly="readonly"  th:field="*{changesList[__${stat.index}__].type}" th:value="${currentChange.getType()}" th:text="${currentChange.getType()}"/></td>
           <td>
              <input type="checkbox" name="|changesList[${stat.index}]|"  th:field="*{changesList[__${stat.index}__].refused}" th:value="${currentChange.getRefused()}" th:checked="${currentChange.refused}" style="text-align:center; vertical-align: middle;">
            </td>
@@ -36,18 +36,18 @@
      
         </tbody>
         </table>
-        <button type="submit">Validate</button>    
+        <button class="hidden-print" type="submit">Validate</button>    
       </form>
-        <button name="printPage"onclick="window.print();return false">Print page</button>
-</div>
-
+        <button class="hidden-print" name="printPage"onclick="window.print();return false">Print page</button>
+</div >
+<div class="hidden-print">
 <button name="IndexButton" onclick="window.location.href='/index'">Home</button>
 <form th:action="@{/logout}" method="post">
     <input type="submit" value="Logout" />
 </form>
 
 <button name="createUserB" onclick="window.location.href='/createUser'">create user</button>
-
+</div>
 
   </body>
 </html>
