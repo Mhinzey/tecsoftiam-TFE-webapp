@@ -8,7 +8,9 @@ import java.util.Properties;
 import javax.validation.constraints.Null;
 
 import com.tecsoftiam.WebappApplication;
-
+/**
+ * Scope class, represents a scope
+ */
 public class Scope {
     private int id;
     private String tenantId;

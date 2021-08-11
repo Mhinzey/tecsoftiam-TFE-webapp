@@ -1,7 +1,7 @@
 package com.tecsoftiam.webapp;
 import javax.persistence.*;
 /**
- * User class (will probably change and get adapted)
+ * User class used for login and data persistence
  */
 @Entity
 @Table(name = "users")

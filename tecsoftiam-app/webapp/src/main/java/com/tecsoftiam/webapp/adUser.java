@@ -10,8 +10,9 @@ public class adUser {
     private String password;
     private String Name;
     private String nickName;
+    private String id;
 
-
+   
     List<String> roles;
     List<String> groups;
     
@@ -38,6 +39,14 @@ public class adUser {
         public String getNickName() {
         return this.nickName;
     }
+    public String getId() {
+            return this.id;
+        }
+
+    public void setId(String id) {
+         this.id = id;
+    }
+
 
     public void setNickName(String nickName) {
         this.nickName = nickName;

@@ -4,23 +4,15 @@ import java.io.IOException;
 import java.sql.*;
 import java.sql.Date;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.logging.Logger;
-
-import javax.servlet.jsp.jstl.sql.Result;
-
 import com.microsoft.graph.models.DirectoryAudit;
 import com.microsoft.graph.models.DirectoryObject;
 import com.microsoft.graph.models.DirectoryRole;
 import com.microsoft.graph.models.Group;
 import com.microsoft.graph.models.User;
 import com.tecsoftiam.WebappApplication;
-
-import org.h2.util.DateTimeUtils;
-import org.simpleframework.xml.filter.SystemFilter;
 
 /** database class, where queries will be written */
 public class dbConnect {
@@ -58,7 +50,44 @@ public class dbConnect {
         insertStatement.setString(3, user.getEmail());
         insertStatement.setBoolean(4, user.isEnabled());
         insertStatement.executeUpdate();
-        connection.close();
+        
+    }
+    public void insertChange(String desc, String stat, int historyID) throws SQLException{
+        PreparedStatement insertStatement = connection
+        .prepareStatement("INSERT INTO adchange (description, status, historyID) VALUES (?, ?, ?) ;");
+
+        insertStatement.setString(1, desc);
+        insertStatement.setString(2, stat);
+        insertStatement.setInt(3, historyID);
+        System.out.println(insertStatement);
+        insertStatement.executeUpdate();
+    }
+    public void insertHistory(Date date, List<adChanges> list) throws SQLException{
+        PreparedStatement insertStatement = connection
+                .prepareStatement("INSERT INTO history (date, scope) VALUES (?, ?) ;", Statement.RETURN_GENERATED_KEYS);
+        insertStatement.setDate(1, date);
+        insertStatement.setString(2, currentAD);
+        System.out.println(insertStatement);
+        insertStatement.executeUpdate();
+        ResultSet rs = insertStatement.getGeneratedKeys();
+        int id=0;
+        String description;
+        String state;
+        adChanges current;
+        if(rs.next())
+        {
+            id = rs.getInt(1);
+        }
+        for(int i=0; i<list.size();i++){
+            current=list.get(i);
+           if(current.typeCible!=null)
+            description="object Name is :"+current.cible+" type of change is :"+current.type+" :"+current.typeCible;
+            else description="object Name  is :"+current.cible+" type of change is: "+current.type;
+            if(current.getRefused()==true) state="refused";
+            else state="accepted";
+            insertChange(description, state, id);
+        }
+
     }
 
   
@@ -154,7 +183,7 @@ public class dbConnect {
         removed.addAll(dbUsers);
         removed.removeAll(adUsers);
         adUsers.removeAll(dbUsers);  
-        connection.close();
+      
         return removed;
     }
     //Detect if a user has been added to a group
@@ -219,7 +248,7 @@ public class dbConnect {
         PreparedStatement insertStatement = connection
         .prepareStatement("INSERT INTO useraddlogs ( date, userId, targetId, scopeName ) VALUES (?, ?, ?,?) ");
         LocalDate localDate=audit.activityDateTime.toLocalDate();
-        System.out.println(java.sql.Date.valueOf(localDate).toString()+"/"+audit.initiatedBy.user.id+"/"+audit.targetResources.get(0).id  );
+        //System.out.println(java.sql.Date.valueOf(localDate).toString()+"/"+audit.initiatedBy.user.id+"/"+audit.targetResources.get(0).id  );
         insertStatement.setDate(1,  java.sql.Date.valueOf(localDate));
         insertStatement.setString(2, audit.initiatedBy.user.id);
         insertStatement.setString(3, audit.targetResources.get(0).id);
@@ -255,7 +284,7 @@ public class dbConnect {
             updateStatement.executeUpdate();
             
         }
-        connection.close();
+        
     }
    
 
@@ -282,7 +311,7 @@ public class dbConnect {
                 
             } 
         }            
-        connection.close();
+       
     }
     //match group with users
     public void matchGroups() throws IOException, SQLException{
@@ -385,7 +414,7 @@ public class dbConnect {
             insertStatement.setString(2, password);
             insertStatement.setString(3, scopeName);
             insertStatement.executeUpdate();
-            connection.close();
+          
     }
     //delete scope from db
     public void deleteScope(String scopeName) throws SQLException{
@@ -410,17 +439,261 @@ public class dbConnect {
         if(id==null) return "erreur no id found";
         return id;
     }
+    public String getRoletemplateId(String name) throws SQLException
+    {
+        ResultSet set;
+        String id=null;
+        PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM adrole where displayName=? and scopeName=?");
+        readStatement.setString(1, name);
+        readStatement.setString(2, currentAD);
+        set=readStatement.executeQuery();
+        while(set.next())
+        {
+          id=set.getString("roleTemplateId");
+      
+        }
+        if(id==null) return "erreur no id found";
+        return id;
+    }   
+    public String getGroupidByName(String name) throws SQLException{
+        ResultSet set;
+        String id=null;
+        PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM adgroup where displayName=? and scopeName=?");
+        readStatement.setString(1, name);
+        readStatement.setString(2, currentAD);
+        set=readStatement.executeQuery();
+        while(set.next())
+        {
+          id=set.getString("adId");
+      
+        }
+        if(id==null) return "erreur no id found";
+        return id;
+    }
+    //delete an history from selected scope
+    public void deleteHistory(int id) throws SQLException{
+        PreparedStatement delete = connection.prepareStatement("DELETE from history where id=? and scope=?");
+        delete.setInt(1, id);
+        delete.setString(2, currentAD);
+        delete.executeUpdate();   
+    }
+    //return roles list of a user
     public List<String> rolesOfUser(String name) throws SQLException{
         ResultSet set;
         List<String> indb=new ArrayList<String>();
-        PreparedStatement readStatement = connection.prepareStatement("SELECT adrole.roleTemplateId FROM adrole JOIN roleuser ON adrole.roleTemplateId=roleuser.roletemplateId JOIN adusers ON roleuser.userId = adusers.id where adrole.scopeName =? AND adusers.displayName=?  ");
+        PreparedStatement readStatement = connection.prepareStatement("SELECT adrole.displayName FROM adrole JOIN roleuser ON adrole.roleTemplateId=roleuser.roletemplateId JOIN adusers ON roleuser.userId = adusers.id where adrole.scopeName =? AND adusers.displayName=?  ");
         readStatement.setString(1, currentAD); 
         readStatement.setString(2, name); 
         set=readStatement.executeQuery();
         while(set.next()){            
-            indb.add(set.getString("roleTemplateId"));
+            indb.add(set.getString("displayName"));
+           
                
           }  
         return indb;
+    }
+    //Return a list of adusers
+    public List<adUser> getUserList() throws SQLException{
+        ResultSet set;
+        adUser usr=new adUser();
+        List<adUser> usersList=new ArrayList<adUser>();
+        PreparedStatement readStatement = connection.prepareStatement("SELECT  dislayName, id FROM adusers where scopeName=?");
+        readStatement.setString(1, currentAD);
+        set=readStatement.executeQuery();
+        while(set.next())
+        {
+            usr.setDisplayName(set.getString("displayName"));
+            usr.setId(set.getString("id"));
+            usersList.add(usr);
+      
+        }
+        return usersList;
+    }
+    //return a list of history
+    public List<history> getHistoryList() throws SQLException{
+        ResultSet set;
+        com.tecsoftiam.webapp.history hist=new com.tecsoftiam.webapp.history();
+        List<com.tecsoftiam.webapp.history> historyList=new ArrayList<com.tecsoftiam.webapp.history>();
+        PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM history where scope=?");
+        readStatement.setString(1, currentAD);
+        set=readStatement.executeQuery();
+        while(set.next())
+        {
+            hist.setId(set.getInt("id"));
+            hist.setDate(set.getDate("date"));
+            hist.setDescription(set.getString("description"));
+            historyList.add(hist);
+      
+        }
+        return historyList;
+    }
+    //return a list of changes related to a history
+    public List<adChanges> getChangesList(int id) throws SQLException{
+        ResultSet set;
+        
+        List<adChanges> changeList=new ArrayList<adChanges>();
+        PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM adchange where historyID= ?");
+        readStatement.setInt(1, id);
+        set=readStatement.executeQuery();
+        while(set.next())
+        {   
+            adChanges change=new adChanges();
+            change.setDescription(set.getString("description"));
+            change.setStatus(set.getString("status"));
+            changeList.add(change);
+      
+        }
+        return changeList;
+    }
+
+    //return a list of role names added to a user
+    public List<String> addedRoleToUser(User user) throws SQLException, IOException{
+        Graph graph=new Graph();
+        String displayName= user.displayName;
+        String id= user.id;
+        List<String> addedRoles=new ArrayList<String>();
+        List<DirectoryRole> adRoles= graph.GetAllRoleFrom(id);
+        List<String> dbRolesNames= rolesOfUser(displayName);
+        for(int i=0;i<adRoles.size();i++){
+            Boolean state=true;
+            String currentRole= adRoles.get(i).displayName;
+            for(int j=0; j<dbRolesNames.size() ;j++){
+                if(currentRole.equals(dbRolesNames.get(j))){
+                    state=false;
+                }
+            }
+            if(state==true){
+                addedRoles.add(currentRole);
+            }
+        }
+        return addedRoles;
+
+    }
+
+    //return a map of <UserName, List<AddedRoles>
+    public Map<String, List<String>>addedRolesToUsers() throws SQLException, IOException{
+        Graph graph=new Graph();
+        Map<String, List<String>> map=new HashMap<String, List<String>>();
+        List<User> users= graph.getAdUserList();
+        for(int i=0;i<users.size();i++){
+            map.put(users.get(i).displayName, addedRoleToUser(users.get(i)));
+
+        }
+        return map;
+    }
+
+    //return a list of removed roles from a user
+    public List<String> removedRolesUser(User user) throws IOException, SQLException{
+        Graph graph=new Graph();
+        String displayName= user.displayName;
+        String id= user.id;
+        List<String> removedRoles=new ArrayList<String>();
+        List<DirectoryRole> adRoles= graph.GetAllRoleFrom(id);
+        List<String> dbRolesNames= rolesOfUser(displayName);
+        for(int i=0;i<dbRolesNames.size();i++){
+            Boolean state=true;
+            String currentRole= dbRolesNames.get(i);
+            for(int j=0; j<adRoles.size() ;j++){
+                if(currentRole.equals(adRoles.get(j).displayName)){
+                    state=false;
+                }
+            }
+            if(state==true){
+                removedRoles.add(currentRole);
+            }
+        }
+        return removedRoles;
+    }
+    //return a map of <UserName, List<RemovedRoles>
+    public Map<String, List<String>>removedRolesFromUsers() throws SQLException, IOException{
+        Graph graph=new Graph();
+        Map<String, List<String>> map=new HashMap<String, List<String>>();
+        List<User> users= graph.getAdUserList();
+        for(int i=0;i<users.size();i++){
+            map.put(users.get(i).displayName, removedRolesUser(users.get(i)));
+
+        }
+        return map;
+    }
+    //return a list of groups of a user
+    public List<String> GroupsOfUser(String name) throws SQLException{
+        ResultSet set;
+        List<String> indb=new ArrayList<String>();
+        PreparedStatement readStatement = connection.prepareStatement("SELECT adgroup.displayName FROM adgroup JOIN usergroup ON adgroup.adId=usergroup.groupid JOIN adusers ON usergroup.userId = adusers.id where adgroup.scopeName =? AND adusers.displayName=?  ");
+        readStatement.setString(1, currentAD); 
+        readStatement.setString(2, name); 
+        set=readStatement.executeQuery();
+        while(set.next()){            
+            indb.add(set.getString("displayName"));             
+          }  
+        return indb;
+    }
+      //return a list of groups names added to a user
+      public List<String> addedgroupToUser(User user) throws SQLException, IOException{
+        Graph graph=new Graph();
+        String displayName= user.displayName;
+        String id= user.id;
+        List<String> addedGroups=new ArrayList<String>();
+        List<Group> adGroups= graph.groupsOf(id);
+        List<String> dbGroupsNames= GroupsOfUser(displayName);
+        for(int i=0;i<adGroups.size();i++){
+            Boolean state=true;
+            String currentRole= adGroups.get(i).displayName;
+            for(int j=0; j<dbGroupsNames.size() ;j++){
+                if(currentRole.equals(dbGroupsNames.get(j))){
+                    state=false;
+                }
+            }
+            if(state==true){
+                addedGroups.add(currentRole);
+            }
+        }
+        return addedGroups;
+
+    }
+    //return a map of <UserName, List<AddedRoles>
+    public Map<String, List<String>>addedGroupsToUsers() throws SQLException, IOException{
+        Graph graph=new Graph();
+        Map<String, List<String>> map=new HashMap<String, List<String>>();
+        List<User> users= graph.getAdUserList();
+        for(int i=0;i<users.size();i++){
+            map.put(users.get(i).displayName, addedgroupToUser(users.get(i)));
+
+        }
+        return map;
+    }
+
+    //return a list of removed roles from a user
+    public List<String> removedGoupsUser(User user) throws IOException, SQLException{
+        Graph graph=new Graph();
+        String displayName= user.displayName;
+        String id= user.id;
+        List<String> removedGroups=new ArrayList<String>();
+        List<Group> adGroups= graph.groupsOf(id);
+        List<String> dbGroupNames= GroupsOfUser(displayName);
+        for(int i=0;i<dbGroupNames.size();i++){
+            Boolean state=true;
+            String currentRole= dbGroupNames.get(i);
+            for(int j=0; j<adGroups.size() ;j++){
+                if(currentRole.equals(adGroups.get(j).displayName)){
+                    state=false;
+                }
+            }
+            if(state==true){
+                removedGroups.add(currentRole);
+            }
+        }
+        return removedGroups;
+    }
+    //return a map of <UserName, List<RemovedRoles>
+    public Map<String, List<String>>removedGroupsFromUsers() throws SQLException, IOException{
+        Graph graph=new Graph();
+        Map<String, List<String>> map=new HashMap<String, List<String>>();
+        List<User> users= graph.getAdUserList();
+        for(int i=0;i<users.size();i++){
+            map.put(users.get(i).displayName, removedGoupsUser(users.get(i)));
+
+        }
+        return map;
     }
 }

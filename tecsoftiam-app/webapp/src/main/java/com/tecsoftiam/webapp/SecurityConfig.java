@@ -13,15 +13,14 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder.BCryptVersion;
-
+/**
+ * Spring security web config class
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    /*@Override
-    protected void configure(HttpSecurity security) throws Exception {
-        security.httpBasic().disable();
-    }*/
+    
     @Autowired
     private javax.sql.DataSource dataSource;
      
@@ -29,6 +28,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public UserDetailsService userDetailsService() {
         return new CustomUserDetailsService();
     }
+    //password encoder
     @Bean 
     @Autowired
     public BCryptPasswordEncoder passwordEncoder() {
@@ -72,19 +72,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(authenticationProvider());
     }
- /*
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-            .antMatchers("/users").authenticated()
-            .anyRequest().permitAll()
-            .and()
-            .formLogin()
-                .usernameParameter("email")
-                .passwordParameter("password")
-                .defaultSuccessUrl("/users")
-                .permitAll()
-            .and()
-            .logout().logoutSuccessUrl("/").permitAll();
-    }*/
+
 }

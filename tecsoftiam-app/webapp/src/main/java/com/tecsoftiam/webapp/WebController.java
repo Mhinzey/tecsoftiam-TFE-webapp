@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.constraints.Size;
+
 import com.azure.core.annotation.Post;
 import com.microsoft.graph.models.DirectoryObject;
 import com.microsoft.graph.models.DirectoryRole;
@@ -266,5 +268,28 @@ public class WebController {
         list= Viewlist.getChangesList();
         detect.applyAllChanges(list);
         return "redirect:/adChanges";
+    }
+    @GetMapping("/history")
+    public String history(Model model) throws IOException, SQLException{
+        dbConnect db= new dbConnect();
+        List<history> list=new ArrayList<history>();
+        list=db.getHistoryList();
+        model.addAttribute("list", list);
+        return "history";
+    }
+    @GetMapping("/history/{id}")
+    public String historyDetail(@PathVariable(value = "id") String id , Model model) throws IOException, SQLException{
+        dbConnect db= new dbConnect();
+        List<adChanges> list=new ArrayList<adChanges>();
+        list=db.getChangesList(Integer.parseInt(id));
+        model.addAttribute("list", list);
+        model.addAttribute("id", id);
+        return "historyDetail";
+    }
+    @PostMapping("/deleteHistory")
+    public String deleteHistory(@RequestParam Map<String, String> requestParams) throws IOException, NumberFormatException, SQLException{
+       dbConnect db=new dbConnect();
+        db.deleteHistory(Integer.parseInt(requestParams.get("id")));
+        return "redirect:/history";
     }
 }

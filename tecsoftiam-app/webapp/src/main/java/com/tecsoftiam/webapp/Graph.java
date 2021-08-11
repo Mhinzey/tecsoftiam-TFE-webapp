@@ -164,6 +164,11 @@ public class Graph {
         .get();
 
     }
+    public DirectoryRole getRoleByRoleName(String name){
+        return graphClient.directoryRoles("displayName="+name)
+        .buildRequest()
+        .get();
+    }
 
     //get all users having a role with templateId 
     public List<DirectoryObject> getUserRoles(String id){
@@ -191,7 +196,7 @@ public class Graph {
         User currentUser;
         DirectoryRole role;
         User usr= getAdUser(id);
-        System.out.println(usr.displayName);
+        
         for(int i=0; i<allRoles.size();i++){
             role= allRoles.get(i);
             usersWRole= getUserRoles(role.roleTemplateId);
@@ -205,6 +210,29 @@ public class Graph {
         }
         return hasRole;
     }
+    //return a list of all roles from a user
+    public List<DirectoryRole> GetAllRoleFromGroup(String id){
+        List<DirectoryRole> allRoles= getDirectoryRoles();
+        List<DirectoryRole> hasRole=new ArrayList<DirectoryRole>();
+        List<DirectoryObject> usersWRole=new ArrayList<DirectoryObject>();
+        Group currentGroup;
+        DirectoryRole role;
+        Group usr= groupDetail(id);
+        
+        for(int i=0; i<allRoles.size();i++){
+            role= allRoles.get(i);
+            usersWRole= getUserRoles(role.roleTemplateId);
+            for(int j=0; j<usersWRole.size();j++ ){
+                currentGroup= (Group)usersWRole.get(j);
+                if(currentGroup.displayName.equals(usr.displayName)){
+                    
+                    hasRole.add(role);
+                }
+            }
+        }
+        return hasRole;
+    }
+
     //return a list of roles the selected used is NOT a part of
     public Set<DirectoryRole> NotHaveRoleList(String id){
      

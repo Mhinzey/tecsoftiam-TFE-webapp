@@ -56,6 +56,8 @@ public class WebappApplication extends SpringBootServletInitializer {
 
 		Graph graphtest = new Graph();
 		dbConnect db = new dbConnect();
+	//	User test=graphtest.getAdUser("2e669a38-c1d6-4de8-881d-60e30f5f92ed");
+	//	graphtest.grantRole("f2ef992c-3afb-46b9-b7cf-a126ee74c451", "41178371-8633-4b5e-9618-cb4afd973301");
 		SpringApplication.run(WebappApplication.class, args);
 
 	}

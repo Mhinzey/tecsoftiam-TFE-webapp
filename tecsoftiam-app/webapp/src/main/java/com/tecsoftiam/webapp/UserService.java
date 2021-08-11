@@ -10,34 +10,36 @@ import java.util.Properties;
 
 import com.microsoft.graph.models.User;
 import com.tecsoftiam.WebappApplication;
-
+/**
+ * User service class used for login
+ */
 public class UserService {
     Connection connection;
     final Properties properties = new Properties();
+
+
+    //constructor, initialize database link
     public UserService() throws IOException, SQLException{
         properties.load(WebappApplication.class.getClassLoader().getResourceAsStream("application.properties"));
         connection = DriverManager.getConnection(properties.getProperty("url"), properties);
     }
-    public AppUser login(String email, String password)
-    {AppUser dbUser = new AppUser();
-    try
-    {
+    //login service
+    public AppUser login(String username, String password)   {
+        AppUser dbUser = new AppUser();
+        try
+       {
 
-        String query = "SELECT * FROM users WHERE email=? AND password=?";
+        String query = "SELECT * FROM users WHERE username=? AND password=?";
         PreparedStatement stmt = connection.prepareStatement(query);
-        stmt.setString(1, email);
+        stmt.setString(1, username);
         stmt.setString(2, password);
-
         ResultSet rs = stmt.executeQuery();
         rs.next();
-
         dbUser.setId(rs.getInt("id"));
         dbUser.setEmail(rs.getString("email"));
         dbUser.setUsername(rs.getString("username"));
         dbUser.setPassword(rs.getString("password"));
-        
-
-        if(email.equals(dbUser.getEmail()) && 
+        if(username.equals(dbUser.getUsername()) && 
                 password.equals(dbUser.getPassword()))
         {
             System.out.println("Successfully Logged-In");
@@ -52,7 +54,6 @@ public class UserService {
     {
         e.printStackTrace();
     }
-
     return dbUser;
 }
 }

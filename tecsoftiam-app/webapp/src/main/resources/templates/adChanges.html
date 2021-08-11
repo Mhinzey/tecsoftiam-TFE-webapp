@@ -22,12 +22,14 @@
          <tr>
          <th> User Name </th>
          <th> Action </th>
+         <th>   </th>
          <th> Refuse </th>
       
          
          <tr  th:each="currentChange,stat : ${wrapper.changesList}"  >
           <td> <input  type="hidden" readonly="readonly"  th:field="*{changesList[__${stat.index}__].cible}" th:value="${currentChange.getCible()}" th:text="${currentChange.getCible()}" /></td>
           <td> <input  type="hidden" readonly="readonly"  th:field="*{changesList[__${stat.index}__].type}" th:value="${currentChange.getType()}" th:text="${currentChange.getType()}"/></td>
+          <td> <input  type="hidden" readonly="readonly"  th:field="*{changesList[__${stat.index}__].typeCible}" th:value="${currentChange.getTypeCible()}" th:text="${currentChange.getTypeCible()}"/></td>
           <td>
              <input type="checkbox" name="|changesList[${stat.index}]|"  th:field="*{changesList[__${stat.index}__].refused}" th:value="${currentChange.getRefused()}" th:checked="${currentChange.refused}" style="text-align:center; vertical-align: middle;">
            </td>
@@ -46,7 +48,6 @@
     <input type="submit" value="Logout" />
 </form>
 
-<button name="createUserB" onclick="window.location.href='/createUser'">create user</button>
 </div>
 
   </body>

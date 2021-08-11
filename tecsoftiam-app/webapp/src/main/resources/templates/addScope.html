@@ -6,7 +6,7 @@
    </head>
 <body>
 <div>
-    <h1>User Registration</h1>
+    <h1>Scope Registration</h1>
     <form action="#" th:action="@{/addScope}" method="post" th:object="${scope}">
         <label>ScopeName:</label>
         <input type="text" th:field="*{scopeName}" /><br/>
@@ -14,9 +14,12 @@
         <label>tenantId:</label>
         <input type="text" th:field="*{tenantId}" /><br/>
         <label>Password:</label>
-        <input type="text" th:field="*{password}" /><br/>
+        <input type="password" th:field="*{password}" /><br/>
 
  <button type="submit">Register</button>    
+ <form>
+  <input type = "button" value = "back"  onclick = "history.back()">
+  </form>
 </form>
 </div>
 </body>
