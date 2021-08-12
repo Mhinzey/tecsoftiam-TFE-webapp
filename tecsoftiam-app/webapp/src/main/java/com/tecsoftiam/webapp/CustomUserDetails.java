@@ -1,11 +1,14 @@
 package com.tecsoftiam.webapp;
 
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
  
 import org.springframework.security.core.GrantedAuthority;
 
+/**
+ * UserDettails implementation ->login purpose
+ * Author: Deryck Olivier
+ */
 public class CustomUserDetails implements UserDetails{
  
     private AppUser user;

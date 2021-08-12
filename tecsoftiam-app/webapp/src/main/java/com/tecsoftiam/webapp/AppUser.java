@@ -2,6 +2,7 @@ package com.tecsoftiam.webapp;
 import javax.persistence.*;
 /**
  * User class used for login and data persistence
+ * Author: Deryck Olivier
  */
 @Entity
 @Table(name = "users")
