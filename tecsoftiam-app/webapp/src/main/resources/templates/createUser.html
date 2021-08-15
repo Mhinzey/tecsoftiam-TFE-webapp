@@ -3,21 +3,36 @@
     <meta charset="UTF-8"/>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
    <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}" />
+   <link rel="stylesheet" th:href="@{/static/css/main.css}" />
+   <script type="text/javascript" th:src="@{/static/js/user.js}"></script>
+   <script type="text/javascript" th:src="@{/static/js/jquery-3.6.0.min.js}"></script>
    </head>
 <body>
-<div>
+
+    <div class="topnav">
+        <button name="IndexButton"  class="navitem active" onclick="window.location.href='/index'">Home</button>
+        <form   th:action="@{/logout}" method="post">
+            <input class="navitem" type="submit" value="Logout" />
+        </form>
+      <button name="scopeSelect" class="navitem" onclick="window.location.href='/scopes'">Scope selection</button>
+    
+  </div>
+  <div>
     <h1>User Registration</h1>
-    <form action="#" th:action="@{/createUser}" method="post" th:object="${user}">
-        <label>DisplayName:</label>
-        <input type="text" th:field="*{displayName}" /><br/>
+    <form action="#" name="registerform" id="regForm" th:action="@{/createUser}" method="post" th:object="${user}">
+        <label>DisplayName:*</label>
+        <input type="text" id="displayname" th:field="*{displayName}" /><br/>
  
-        <label>E-mail:</label>
-        <input type="text" th:field="*{mail}" /><br/>
-        <label>E-mail nick:</label>
-        <input type="text" th:field="*{nickName}" /><br/>
+        <label>E-mail:*</label>
+        <input type="text" id="nickname" th:field="*{nickName}" />@
+        <select name="domainsList"  id="domainsList"  th:field="*{domain}" >
+            <option th:each="domain : ${domains}" th:value="${domain.id}" th:text="${domain.id}"></option> 
+        </select> <br/>
  
-        <label>Password:</label>
-        <input type="password" th:field="*{password}" /><br/>
+        <label>Password:*</label>
+        <input name="pass1" id= "passw1" type="password" th:field="*{password}" /><br/>
+        <label>Password again:*</label>
+        <input name="pass2" id= "passw2" type="password" /><br/>
       
     
     <label>Role(s):</label>
@@ -31,7 +46,7 @@
 <select name="groupsList"  id="groupsList"  th:field="*{groups}" multiple>
     <option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.displayName}"></option> 
 </select> 
- <button type="submit">Register</button>    
+ <button type="submit" onclick="registervalidation()">Register</button>    
 </form>
 </div>
 </body>

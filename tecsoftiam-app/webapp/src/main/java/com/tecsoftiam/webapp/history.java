@@ -31,26 +31,50 @@ public class history {
         this.description = desc;
     }
 
+    
+    /** 
+     * @return int
+     */
     public int getId() {
         return this.id;
     }
 
+    
+    /** 
+     * @param id
+     */
     public void setId(int id) {
         this.id = id;
     }
 
+    
+    /** 
+     * @return Date
+     */
     public Date getDate() {
         return this.date;
     }
 
+    
+    /** 
+     * @param date
+     */
     public void setDate(Date date) {
         this.date = date;
     }
 
+    
+    /** 
+     * @return String
+     */
     public String getDescription() {
         return this.description;
     }
 
+    
+    /** 
+     * @param description
+     */
     public void setDescription(String description) {
         this.description = description;
     }

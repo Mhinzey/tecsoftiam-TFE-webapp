@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
 import com.microsoft.graph.models.DirectoryAudit;
 import com.microsoft.graph.models.DirectoryRole;
+import com.microsoft.graph.models.Domain;
 import com.microsoft.graph.models.Request;
 import com.microsoft.graph.models.Subscription;
 import com.microsoft.graph.models.User;
@@ -34,6 +35,7 @@ import com.tecsoftiam.webapp.AppUser;
 import com.tecsoftiam.webapp.Graph;
 import com.tecsoftiam.webapp.dbConnect;
 
+
 import org.json.JSONObject;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -47,15 +49,31 @@ import java.util.Properties;
 @SpringBootApplication
 public class WebappApplication extends SpringBootServletInitializer {
 
+	
+	/** 
+	 * @param application
+	 * @return SpringApplicationBuilder
+	 */
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(WebappApplication.class);
 	}
 
+	
+	/** 
+	 * @param args
+	 * @throws IOException
+	 * @throws SQLException
+	 * @throws ParseException
+	 */
 	public static void main(String[] args) throws IOException, SQLException, ParseException {
 
 		Graph graphtest = new Graph();
 		dbConnect db = new dbConnect();
+		List<Domain> lst= graphtest.domainList();
+		for(int i=0;i<lst.size();i++){
+			System.out.println(lst.get(i).id);
+		}
 	//	User test=graphtest.getAdUser("2e669a38-c1d6-4de8-881d-60e30f5f92ed");
 	//	graphtest.grantRole("f2ef992c-3afb-46b9-b7cf-a126ee74c451", "41178371-8633-4b5e-9618-cb4afd973301");
 		SpringApplication.run(WebappApplication.class, args);

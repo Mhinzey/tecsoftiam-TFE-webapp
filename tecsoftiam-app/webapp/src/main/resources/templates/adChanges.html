@@ -5,13 +5,23 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
     <script type="text/javascript" th:src="@{/static/js/changes.js}"></script>
     <link rel="stylesheet" type="text/css" th:href="@{/static/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/static/css/main.css}" />
   </head>
   <body>
+    <div class="topnav hidden-print">
+        <button name="IndexButton"  class="navitem active" onclick="window.location.href='/index'">Home</button>
+        <form   th:action="@{/logout}" method="post">
+            <input class="navitem" type="submit" value="Logout" />
+        </form>
+      <button name="scopeSelect" class="navitem" onclick="window.location.href='/scopes'">Scope selection</button>
+    
+  </div>
+
     <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]]</h3>
     <div class="container">
-
+      
       <div th:if="${not #lists.isEmpty(changes)}"></div>
-      <form action="#" th:action="@{/adChanges}" th:object="${wrapper}" method="post">
+      <form action="#" id="changeForm" th:action="@{/adChanges}" th:object="${wrapper}" method="post">
       <table class = "table table-striped"> 
         <thead>
           <tr>
@@ -38,17 +48,10 @@
      
         </tbody>
         </table>
-        <button class="hidden-print" type="submit">Validate</button>    
+        <button class="hidden-print" onclick="changeValidation()" type="submit">Validate</button>    
       </form>
         <button class="hidden-print" name="printPage"onclick="window.print();return false">Print page</button>
 </div >
-<div class="hidden-print">
-<button name="IndexButton" onclick="window.location.href='/index'">Home</button>
-<form th:action="@{/logout}" method="post">
-    <input type="submit" value="Logout" />
-</form>
-
-</div>
 
   </body>
 </html>

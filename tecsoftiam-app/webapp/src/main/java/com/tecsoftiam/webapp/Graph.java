@@ -15,6 +15,7 @@ import com.microsoft.graph.models.DirectoryAudit;
 import com.microsoft.graph.models.DirectoryObject;
 import com.microsoft.graph.models.DirectoryObjectGetMemberGroupsParameterSet;
 import com.microsoft.graph.models.DirectoryRole;
+import com.microsoft.graph.models.Domain;
 import com.microsoft.graph.models.Group;
 import com.microsoft.graph.models.PasswordProfile;
 import com.microsoft.graph.models.User;
@@ -29,6 +30,8 @@ import com.microsoft.graph.requests.DirectoryAuditCollectionPage;
 import com.microsoft.graph.requests.DirectoryObjectCollectionWithReferencesPage;
 import com.microsoft.graph.requests.DirectoryObjectGetMemberGroupsCollectionPage;
 import com.microsoft.graph.requests.DirectoryRoleCollectionPage;
+import com.microsoft.graph.requests.DomainCollectionPage;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -606,4 +609,21 @@ public class Graph {
         graphClient.directory().deletedItems(id).restore().buildRequest().post();
     }
 
+    /**
+     * get all domains authorized in the ad
+     * @return
+     */
+    public List<Domain> domainList(){
+       
+        DomainCollectionPage domains = graphClient.domains()
+	.buildRequest()
+	.get(); 
+    List<Domain> list=domains.getCurrentPage();
+
+    while (domains.getNextPage() != null) {
+        domains = domains.getNextPage().buildRequest().get();
+        list.addAll(domains.getCurrentPage());
+    }
+        return list;
+    }
 }

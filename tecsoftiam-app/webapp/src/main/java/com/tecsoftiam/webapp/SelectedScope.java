@@ -6,14 +6,26 @@ package com.tecsoftiam.webapp;
 public class SelectedScope {
     Scope scope;
 
+    
+    /** 
+     * @return Scope
+     */
     public Scope getScope() {
         return this.scope;
     }
 
+    
+    /** 
+     * @param scope
+     */
     public void setScope(Scope scope) {
         this.scope = scope;
     }
 
+    
+    /** 
+     * @param scope
+     */
     public void SelectedScope(Scope scope) {
         this.scope = scope;
     }

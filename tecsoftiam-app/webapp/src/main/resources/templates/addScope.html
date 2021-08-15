@@ -3,8 +3,17 @@
     <meta charset="UTF-8"/>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
    <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}" />
+   <link rel="stylesheet" th:href="@{/static/css/main.css}" />
    </head>
 <body>
+
+  <div class="topnav">
+    <button name="IndexButton"  class="navitem active" onclick="window.location.href='/index'">Home</button>
+    <form   th:action="@{/logout}" method="post">
+        <input class="navitem" type="submit" value="Logout" />
+    </form>
+  <button name="scopeSelect" class="navitem" onclick="window.location.href='/scopes'">Scope selection</button>
+</div>
 <div>
     <h1>Scope Registration</h1>
     <form action="#" th:action="@{/addScope}" method="post" th:object="${scope}">
@@ -13,6 +22,8 @@
  
         <label>tenantId:</label>
         <input type="text" th:field="*{tenantId}" /><br/>
+        <label>appid:</label>
+        <input type="text" th:field="*{appId}" /><br/>
         <label>Password:</label>
         <input type="password" th:field="*{password}" /><br/>
 

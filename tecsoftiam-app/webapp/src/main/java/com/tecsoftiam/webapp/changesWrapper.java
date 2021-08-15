@@ -14,10 +14,18 @@ public class changesWrapper {
 
     }
 
+    
+    /** 
+     * @return List<adChanges>
+     */
     public List<adChanges> getChangesList() {
         return this.changesList;
     }
 
+    
+    /** 
+     * @param changesList
+     */
     public void setChangesList(List<adChanges> changesList) {
         this.changesList = changesList;
     }

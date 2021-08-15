@@ -200,8 +200,9 @@ public class dbConnect {
         for (int i = 0; i < currentList.size(); i++) {
             String userId = currentList.get(i).id;
             PreparedStatement readStatement = connection
-                    .prepareStatement("SELECT displayName FROM adusers where id = ?");
+                    .prepareStatement("SELECT displayName FROM adusers where id = ? and scopeName=?");
             readStatement.setString(1, userId);
+            readStatement.setString(2, currentAD);
             set = readStatement.executeQuery();
 
             if (!set.next()) {
@@ -231,7 +232,8 @@ public class dbConnect {
             String userName = usrlist.get(i).displayName;
             adUsers.add(userName);
         }
-        PreparedStatement readStatement = connection.prepareStatement("SELECT displayName FROM adusers");
+        PreparedStatement readStatement = connection.prepareStatement("SELECT displayName FROM adusers where scopeName=?");
+        readStatement.setString(1, currentAD);
         set = readStatement.executeQuery();
         while (set.next()) {
             String dpName = set.getString("displayName");
@@ -404,7 +406,8 @@ public class dbConnect {
         ResultSet set;
         List<String> rolesTemplates = new ArrayList<String>();
         Graph graph = new Graph();
-        PreparedStatement readStatement = connection.prepareStatement("SELECT  roleTemplateId FROM adrole");
+        PreparedStatement readStatement = connection.prepareStatement("SELECT  roleTemplateId FROM adrole where scopeName=?");
+        readStatement.setString(1, currentAD);
         set = readStatement.executeQuery();
         while (set.next()) {
             rolesTemplates.add(set.getString("roleTemplateId"));
@@ -413,9 +416,17 @@ public class dbConnect {
             List<DirectoryObject> lst = graph.getUserRoles(rolesTemplates.get(i));
 
             for (int j = 0; j < lst.size(); j++) {
+                PreparedStatement readStatement2 = connection.prepareStatement("SELECT  id FROM adrole where roleTemplateId=? and scopeName=?");
+                readStatement2.setString(1, rolesTemplates.get(i));
+                readStatement2.setString(2, currentAD);
+                set = readStatement2.executeQuery();
+                int id=0;
+                while (set.next()) {
+                    id=set.getInt("id");
+                }
                 PreparedStatement insertStatement = connection
-                        .prepareStatement("INSERT INTO roleuser ( roleTemplateId, userId ,scopeName) VALUES (?,?,?) ");
-                insertStatement.setString(1, rolesTemplates.get(i));
+                        .prepareStatement("INSERT INTO roleuser ( roleId, userId ,scopeName) VALUES (?,?,?) ");
+                insertStatement.setInt(1, id);
                 insertStatement.setString(2, lst.get(j).id);
                 insertStatement.setString(3, currentAD);
                 insertStatement.executeUpdate();
@@ -526,7 +537,7 @@ public class dbConnect {
         insertAllgroups(graph.getGroupsList());
         matchGroups();
         matchRoles();
-        insertAllLogs(graph.getDirectoryAudits());
+        //insertAllLogs(graph.getDirectoryAudits());
     }
 
     /**
@@ -542,7 +553,7 @@ public class dbConnect {
         List<Scope> list = new ArrayList<Scope>();
         while (set.next()) {
             Scope scope = new Scope(set.getInt("id"), set.getString("tenantId"), set.getString("password"),
-                    set.getString("scopeName"));
+                    set.getString("scopeName"), set.getString("appId"));
             list.add(scope);
         }
         return list;
@@ -567,6 +578,7 @@ public class dbConnect {
             scope.setTenantId(set.getString("tenantId"));
             scope.setPassword(set.getString("password"));
             scope.setScopeName(set.getString("scopename"));
+            scope.setAppId(set.getString("appId"));
         }
 
         return scope;
@@ -581,13 +593,14 @@ public class dbConnect {
      * @param scopeName name of the scope
      * @throws SQLException
      */
-    public void addScope(String tenantId, String password, String scopeName) throws SQLException {
+    public void addScope(String tenantId, String password, String scopeName, String appid) throws SQLException {
         PreparedStatement insertStatement = connection
-                .prepareStatement("INSERT INTO scopes (tenantId, password, scopeName) VALUES (?, ?, ?);");
+                .prepareStatement("INSERT INTO scopes (tenantId, password, scopeName, appId) VALUES (?, ?, ?, ?);");
 
         insertStatement.setString(1, tenantId);
         insertStatement.setString(2, password);
         insertStatement.setString(3, scopeName);
+        insertStatement.setString(4, appid);
         insertStatement.executeUpdate();
 
     }
@@ -639,9 +652,9 @@ public class dbConnect {
         ResultSet set;
         String id = null;
         PreparedStatement readStatement = connection
-                .prepareStatement("SELECT  * FROM adrole where displayName=? and scopeName=?");
+                .prepareStatement("SELECT  * FROM adrole where displayName=?");
         readStatement.setString(1, name);
-        readStatement.setString(2, currentAD);
+        
         set = readStatement.executeQuery();
         while (set.next()) {
             id = set.getString("roleTemplateId");
@@ -700,7 +713,7 @@ public class dbConnect {
         ResultSet set;
         List<String> indb = new ArrayList<String>();
         PreparedStatement readStatement = connection.prepareStatement(
-                "SELECT adrole.displayName FROM adrole JOIN roleuser ON adrole.roleTemplateId=roleuser.roletemplateId JOIN adusers ON roleuser.userId = adusers.id where adrole.scopeName =? AND adusers.displayName=?  ");
+                "SELECT adrole.displayName FROM adrole JOIN roleuser ON adrole.id=roleuser.roleId JOIN adusers ON roleuser.userId = adusers.id where adrole.scopeName =? AND adusers.displayName=?  ");
         readStatement.setString(1, currentAD);
         readStatement.setString(2, name);
         set = readStatement.executeQuery();
@@ -742,12 +755,13 @@ public class dbConnect {
      */
     public List<history> getHistoryList() throws SQLException {
         ResultSet set;
-        com.tecsoftiam.webapp.history hist = new com.tecsoftiam.webapp.history();
+        
         List<com.tecsoftiam.webapp.history> historyList = new ArrayList<com.tecsoftiam.webapp.history>();
         PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM history where scope=?");
         readStatement.setString(1, currentAD);
         set = readStatement.executeQuery();
         while (set.next()) {
+            com.tecsoftiam.webapp.history hist = new com.tecsoftiam.webapp.history();
             hist.setId(set.getInt("id"));
             hist.setDate(set.getDate("date"));
             hist.setDescription(set.getString("description"));

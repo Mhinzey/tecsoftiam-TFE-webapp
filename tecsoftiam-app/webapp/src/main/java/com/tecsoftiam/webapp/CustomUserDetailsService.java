@@ -15,6 +15,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepo;
 
+    
+    /** 
+     * @param username
+     * @return UserDetails
+     * @throws UsernameNotFoundException
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         AppUser user = userRepo.findByUsername(username);
@@ -29,6 +35,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    
+    /** 
+     * @param user
+     */
     public void saveUser(AppUser user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepo.save(user);

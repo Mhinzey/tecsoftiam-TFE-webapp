@@ -2,6 +2,7 @@ package com.tecsoftiam.webapp;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import com.microsoft.graph.models.DirectoryObject;
 import com.microsoft.graph.models.DirectoryRole;
+import com.microsoft.graph.models.Domain;
 import com.microsoft.graph.models.Group;
 import com.microsoft.graph.models.User;
 import org.springframework.stereotype.Controller;
@@ -29,6 +31,12 @@ public class WebController {
 
     UserRepository userRepo;
 
+    
+    /** 
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/index")
     public String index(Model model) throws IOException {
         Scope scope = new Scope();
@@ -36,6 +44,13 @@ public class WebController {
         return "index";
     }
 
+    
+    /** 
+     * @param userId
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/users/{id}")
     public String userdetails(@PathVariable(value = "id") String userId, Model model) throws IOException {
         Graph msGraph = new Graph();
@@ -48,6 +63,12 @@ public class WebController {
         return "userDetail";
     }
 
+    
+    /** 
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/users")
     public String user(Model model) throws IOException {
         Graph msGraph = new Graph();
@@ -56,6 +77,12 @@ public class WebController {
         return "user";
     }
 
+    
+    /** 
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/roles")
     public String roles(Model model) throws IOException {
         Graph msGraph = new Graph();
@@ -64,6 +91,13 @@ public class WebController {
         return "roles";
     }
 
+    
+    /** 
+     * @param templateId
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/roles/{id}")
     public String rolesdetails(@PathVariable(value = "id") String templateId, Model model) throws IOException {
         Graph msGraph = new Graph();
@@ -74,6 +108,12 @@ public class WebController {
         return "roledetails";
     }
 
+    
+    /** 
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/groups")
     public String groups(Model model) throws IOException {
         Graph msGraph = new Graph();
@@ -82,6 +122,13 @@ public class WebController {
         return "groups";
     }
 
+    
+    /** 
+     * @param groupId
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/groups/{id}")
     public String groupsDetails(@PathVariable(value = "id") String groupId, Model model) throws IOException {
         Graph msGraph = new Graph();
@@ -92,6 +139,12 @@ public class WebController {
         return "groupDetails";
     }
 
+    
+    /** 
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/createUser")
     public String userForm(Model model) throws IOException {
         adUser user = new adUser();
@@ -101,14 +154,25 @@ public class WebController {
         model.addAttribute("roles", roles);
         List<Group> groups = msGraph.getGroupsList();
         model.addAttribute("groups", groups);
+        List<Domain> domains= msGraph.domainList();
+        model.addAttribute("domains", domains);
         return "createUser";
     }
 
+    
+    /** 
+     * @param Model
+     * @param user
+     * @return String
+     * @throws IOException
+     */
     @PostMapping("/createUser")
     public String createUser(Model Model, @ModelAttribute("user") adUser user) throws IOException {
         Graph msGraph = new Graph();
         String id;
-        msGraph.CreateUser(user.getDisplayName(), user.getNickName(), user.getMail(), user.getName(),
+        String nick=user.getNickName();
+        String mail= nick+"@"+user.getDomain();
+        msGraph.CreateUser(user.getDisplayName(), nick, mail, user.getName(),
                 user.getPassword());
         id = msGraph.getAdUserByDP(user.getDisplayName()).id;
 
@@ -123,6 +187,12 @@ public class WebController {
         return "index";
     }
 
+    
+    /** 
+     * @param requestParams
+     * @return String
+     * @throws IOException
+     */
     @PostMapping("/deleteUser")
     public String deleteUser(@RequestParam Map<String, String> requestParams) throws IOException {
         Graph msGraph = new Graph();
@@ -131,6 +201,13 @@ public class WebController {
         return "redirect:/users";
     }
 
+    
+    /** 
+     * @param id
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/giveGroup/{id}")
     public String giveGroup(@PathVariable(value = "id") String id, Model model) throws IOException {
         Graph msGraph = new Graph();
@@ -143,6 +220,14 @@ public class WebController {
         return "giveGroup";
     }
 
+    
+    /** 
+     * @param requestParams
+     * @param user
+     * @param Model
+     * @return String
+     * @throws IOException
+     */
     @PostMapping("/giveGroup{id}")
     public String giveGroupP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,
             Model Model) throws IOException {
@@ -154,6 +239,13 @@ public class WebController {
         return "redirect:/users/" + id;
     }
 
+    
+    /** 
+     * @param id
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/deleteGroup/{id}")
     public String deleteGroup(@PathVariable(value = "id") String id, Model model) throws IOException {
         Graph msGraph = new Graph();
@@ -166,6 +258,14 @@ public class WebController {
         return "deleteGroup";
     }
 
+    
+    /** 
+     * @param requestParams
+     * @param user
+     * @param Model
+     * @return String
+     * @throws IOException
+     */
     @PostMapping("/deleteGroup{id}")
     public String deleteGroupP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,
             Model Model) throws IOException {
@@ -177,6 +277,13 @@ public class WebController {
         return "redirect:/users/" + id;
     }
 
+    
+    /** 
+     * @param id
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/giveRole/{id}")
     public String giveRole(@PathVariable(value = "id") String id, Model model) throws IOException {
         Graph msGraph = new Graph();
@@ -189,6 +296,14 @@ public class WebController {
         return "giveRole";
     }
 
+    
+    /** 
+     * @param requestParams
+     * @param user
+     * @param Model
+     * @return String
+     * @throws IOException
+     */
     @PostMapping("/giveRole{id}")
     public String giveRoleP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,
             Model Model) throws IOException {
@@ -200,6 +315,13 @@ public class WebController {
         return "redirect:/users/" + id;
     }
 
+    
+    /** 
+     * @param id
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/deleteRole/{id}")
     public String deleteRole(@PathVariable(value = "id") String id, Model model) throws IOException {
         Graph msGraph = new Graph();
@@ -212,6 +334,14 @@ public class WebController {
         return "deleteRole";
     }
 
+    
+    /** 
+     * @param requestParams
+     * @param user
+     * @param Model
+     * @return String
+     * @throws IOException
+     */
     @PostMapping("/deleteRole{id}")
     public String deleteRoleP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,
             Model Model) throws IOException {
@@ -223,6 +353,13 @@ public class WebController {
         return "redirect:/users/" + id;
     }
 
+    
+    /** 
+     * @param model
+     * @return String
+     * @throws IOException
+     * @throws SQLException
+     */
     @GetMapping("/scopes")
     public String scopePage(Model model) throws IOException, SQLException {
         dbConnect db = new dbConnect();
@@ -233,6 +370,14 @@ public class WebController {
         return "scopes";
     }
 
+    
+    /** 
+     * @param Model
+     * @param scope
+     * @return String
+     * @throws IOException
+     * @throws SQLException
+     */
     @PostMapping("/scopes")
     public String scopePageP(Model Model, @ModelAttribute("selectedScope") Scope scope)
             throws IOException, SQLException {
@@ -243,6 +388,12 @@ public class WebController {
         return "redirect:/index";
     }
 
+    
+    /** 
+     * @param model
+     * @return String
+     * @throws IOException
+     */
     @GetMapping("/addScope")
     public String addScopeFrom(Model model) throws IOException {
         Scope scope = new Scope(0);
@@ -250,13 +401,28 @@ public class WebController {
         return "addScope";
     }
 
+    
+    /** 
+     * @param model
+     * @param scope
+     * @return String
+     * @throws IOException
+     * @throws SQLException
+     */
     @PostMapping("/addScope")
     public String addScopeP(Model model, @ModelAttribute("scope") Scope scope) throws IOException, SQLException {
         dbConnect db = new dbConnect();
-        db.addScope(scope.getTenantId(), scope.getPassword(), scope.getScopeName());
+        db.addScope(scope.getTenantId(), scope.getPassword(), scope.getScopeName(), scope.getAppId());
         return "redirect:/scopes";
     }
 
+    
+    /** 
+     * @param model
+     * @return String
+     * @throws IOException
+     * @throws SQLException
+     */
     @GetMapping("/adChanges")
     public String adChanges(Model model) throws IOException, SQLException {
         changeDetect detect = new changeDetect();
@@ -268,16 +434,35 @@ public class WebController {
         return "adChanges";
     }
 
+    
+    /** 
+     * @param model
+     * @param Viewlist
+     * @param bindingResult
+     * @return String
+     * @throws IOException
+     * @throws SQLException
+     * @throws ParseException
+     */
     @PostMapping("/adChanges")
     public String adChangesP(Model model, @ModelAttribute("wrapper") changesWrapper Viewlist,
-            BindingResult bindingResult) throws IOException, SQLException {
+            BindingResult bindingResult) throws IOException, SQLException, ParseException {
+        dbConnect db=new dbConnect();
         changeDetect detect = new changeDetect();
         List<adChanges> list = new ArrayList<adChanges>();
         list = Viewlist.getChangesList();
         detect.applyAllChanges(list);
+        db.refreshDb();
         return "redirect:/adChanges";
     }
 
+    
+    /** 
+     * @param model
+     * @return String
+     * @throws IOException
+     * @throws SQLException
+     */
     @GetMapping("/history")
     public String history(Model model) throws IOException, SQLException {
         dbConnect db = new dbConnect();
@@ -287,6 +472,14 @@ public class WebController {
         return "history";
     }
 
+    
+    /** 
+     * @param id
+     * @param model
+     * @return String
+     * @throws IOException
+     * @throws SQLException
+     */
     @GetMapping("/history/{id}")
     public String historyDetail(@PathVariable(value = "id") String id, Model model) throws IOException, SQLException {
         dbConnect db = new dbConnect();
@@ -297,11 +490,25 @@ public class WebController {
         return "historyDetail";
     }
 
+    
+    /** 
+     * @param requestParams
+     * @return String
+     * @throws IOException
+     * @throws NumberFormatException
+     * @throws SQLException
+     */
     @PostMapping("/deleteHistory")
     public String deleteHistory(@RequestParam Map<String, String> requestParams)
             throws IOException, NumberFormatException, SQLException {
         dbConnect db = new dbConnect();
         db.deleteHistory(Integer.parseInt(requestParams.get("id")));
         return "redirect:/history";
+    }
+
+    @PostMapping("/refreshdb")
+    public void refreshdb() throws IOException, SQLException, ParseException{
+        dbConnect db= new dbConnect();
+        db.refreshDb();
     }
 }

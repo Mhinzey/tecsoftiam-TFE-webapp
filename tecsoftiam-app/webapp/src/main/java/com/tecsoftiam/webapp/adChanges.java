@@ -48,54 +48,106 @@ public class adChanges {
         this.refused = refused;
     }
 
+    
+    /** 
+     * @return Boolean
+     */
     public Boolean isRefused() {
         return this.refused;
     }
 
+    
+    /** 
+     * @return Boolean
+     */
     public Boolean getRefused() {
         return this.refused;
     }
 
+    
+    /** 
+     * @param refused
+     */
     public void setRefused(Boolean refused) {
         this.refused = refused;
     }
 
+    
+    /** 
+     * @return String
+     */
     public String getCible() {
         return this.cible;
     }
 
+    
+    /** 
+     * @param cible
+     */
     public void setCible(String cible) {
         this.cible = cible;
     }
 
+    
+    /** 
+     * @return String
+     */
     public String getType() {
         return this.type;
     }
 
+    
+    /** 
+     * @param Type
+     */
     public void setType(String Type) {
         this.type = Type;
     }
 
+    
+    /** 
+     * @return String
+     */
     public String getTypeCible() {
         return this.typeCible;
     }
 
+    
+    /** 
+     * @param typeCible
+     */
     public void setTypeCible(String typeCible) {
         this.typeCible = typeCible;
     }
 
+    
+    /** 
+     * @return String
+     */
     public String getDescription() {
         return this.description;
     }
 
+    
+    /** 
+     * @param description
+     */
     public void setDescription(String description) {
         this.description = description;
     }
 
+    
+    /** 
+     * @return String
+     */
     public String getStatus() {
         return this.status;
     }
 
+    
+    /** 
+     * @param status
+     */
     public void setStatus(String status) {
         this.status = status;
     }

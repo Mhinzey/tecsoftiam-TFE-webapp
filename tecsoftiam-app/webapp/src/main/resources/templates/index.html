@@ -2,26 +2,37 @@
 <html lang="en"  xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8"/>
+    <title>Index pannel</title>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
    <link rel="stylesheet"  type="text/css" th:href="@{static/css/bootstrap.min.css}" />
+   <script type="text/javascript" th:src="@{/static/js/jquery-3.6.0.min.js}"></script>
+   <link rel="stylesheet"  type="text/css" th:href="@{static/css/main.css}" />
+   <script type="text/javascript" th:src="@{/static/js/changes.js}"></script>
    </head>
   <body>
-    <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]] <small> Current scope is:  <span th:text="${scopeName}" ></span></small></h3>
-
+    <div class="topnav">
+        <button name="IndexButton"  class="navitem active" onclick="window.location.href='/index'">Home</button>
+        <form   th:action="@{/logout}" method="post">
+            <input class="navitem" type="submit" value="Logout" />
+        </form>
+      <button name="scopeSelect" class="navitem" onclick="window.location.href='/scopes'">Scope selection</button>
+    
+  </div>
     <div class="container">
+      <h2 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]] <small> Current scope is:  <span th:text="${scopeName}" ></span></small></h3>
+     <div class="pannelrow row justify-content-md-center">
+      <button class="col-md-3 text-center btn btn-primary btn-lg adminbutton"  name="userInfo" onclick="window.location.href='/users'">Informations utilisateurs</button>
+      <button class="col-md-3 text-center btn btn-primary btn-lg adminbutton" name="roleInfo" onclick="window.location.href='/roles'">Informations roles</button>
+      <button class="col-md-3 text-center btn btn-primary btn-lg adminbutton" name="groupInfo" onclick="window.location.href='/groups'">Informations groupes</button>
+    </div>
+      <div class="pannelrow row justify-content-md-center">
+      <button class="col-md-3 text-center btn btn-primary btn-lg adminbutton" name="changes" onclick="window.location.href='/adChanges'">Changements dans l'AD</button>
+      <button class="col-md-3 text-center btn btn-primary btn-lg adminbutton" name="history" onclick="window.location.href='/history'">Historique des changements</button>
+      <form id="refreshdb" method="POST" th:action="@{/refreshdb}">
+        <button  class="col-md-3 text-center btn btn-primary btn-lg adminbutton"  name="refresh" value="value" onclick="myValidationFunction()">Actualiser base de données</button>
+    </form>
+     </div>
 
-      <button name="userInfo" onclick="window.location.href='/users'">Informations utilisateurs</button>
-      <button name="roleInfo" onclick="window.location.href='/roles'">Informations roles</button>
-      <button name="groupInfo" onclick="window.location.href='/groups'">Informations groupes</button>
-      <button name="scopeSelect" onclick="window.location.href='/scopes'">Scope selection</button>
-      <button name="changes" onclick="window.location.href='/adChanges'">Changements dans l'AD</button>
-      <button name="changes" onclick="window.location.href='/history'">Historique des changements</button>
-     
 </div>
-<button name="IndexButton" onclick="window.location.href='/index'">Home</button>
-<form th:action="@{/logout}" method="post">
-    <input type="submit" value="Logout" />
-</form>
-
   </body>
 </html>
