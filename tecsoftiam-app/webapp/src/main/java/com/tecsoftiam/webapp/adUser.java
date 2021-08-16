@@ -7,7 +7,7 @@ import java.util.List;
  * database interactions
  * Author: Deryck Olivier
  */
-public class adUser {
+public class AdUser {
     private String displayName;
     private String mail;
     private String password;
@@ -15,7 +15,8 @@ public class adUser {
     private String nickName;
     private String id;
     private String domain;
-
+    public List<String> roles;
+    public List<String> groups;
     public String getDomain() {
         return this.domain;
     }
@@ -24,13 +25,12 @@ public class adUser {
         this.domain = domain;
     }
 
-    List<String> roles;
-    List<String> groups;
+    
 
     /**
      * empty constructor
      */
-    public adUser() {
+    public AdUser() {
 
     }
 
@@ -43,7 +43,7 @@ public class adUser {
      * @param name user name
      * @param roles roles list
      */
-    public adUser(String displayString, String mail, String passwString, String name, List<String> roles) {
+    public AdUser(String displayString, String mail, String passwString, String name, List<String> roles) {
         this.displayName = displayString;
         this.nickName = displayString;
         this.mail = mail;
@@ -61,7 +61,7 @@ public class adUser {
      * @param roles roles list
      * @param groups groups list
      */
-    public adUser(String displayString, String mail, String passwString, String name, List<String> roles,
+    public AdUser(String displayString, String mail, String passwString, String name, List<String> roles,
             List<String> groups) {
         this.displayName = displayString;
         this.nickName = displayString;

@@ -147,7 +147,7 @@ public class WebController {
      */
     @GetMapping("/createUser")
     public String userForm(Model model) throws IOException {
-        adUser user = new adUser();
+        AdUser user = new AdUser();
         Graph msGraph = new Graph();
         model.addAttribute("user", user);
         List<DirectoryRole> roles = msGraph.getDirectoryRoles();
@@ -167,7 +167,7 @@ public class WebController {
      * @throws IOException
      */
     @PostMapping("/createUser")
-    public String createUser(Model Model, @ModelAttribute("user") adUser user) throws IOException {
+    public String createUser(Model Model, @ModelAttribute("user") AdUser user) throws IOException {
         Graph msGraph = new Graph();
         String id;
         String nick=user.getNickName();
@@ -176,12 +176,12 @@ public class WebController {
                 user.getPassword());
         id = msGraph.getAdUserByDP(user.getDisplayName()).id;
 
-        for (int i = 0; i < user.roles.size(); i++) {
-            msGraph.grantRole(user.roles.get(i), id);
+        for (int i = 0; i < user.getRoles().size(); i++) {
+            msGraph.grantRole(user.getRoles().get(i), id);
 
         }
-        for (int i = 0; i < user.groups.size(); i++) {
-            msGraph.addToGroup(id, user.groups.get(i));
+        for (int i = 0; i < user.getGroups().size(); i++) {
+            msGraph.addToGroup(id, user.getGroups().get(i));
 
         }
         return "index";
@@ -212,7 +212,7 @@ public class WebController {
     public String giveGroup(@PathVariable(value = "id") String id, Model model) throws IOException {
         Graph msGraph = new Graph();
         User user = msGraph.getAdUser(id);
-        adUser aduser = new adUser();
+        AdUser aduser = new AdUser();
         Set<Group> groups = msGraph.NotHaveGroupList(id);
         model.addAttribute("user", user);
         model.addAttribute("groups", groups);
@@ -229,12 +229,12 @@ public class WebController {
      * @throws IOException
      */
     @PostMapping("/giveGroup{id}")
-    public String giveGroupP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,
+    public String giveGroupP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") AdUser user,
             Model Model) throws IOException {
         Graph msGraph = new Graph();
         String id = requestParams.get("id");
-        for (int i = 0; i < user.groups.size(); i++) {
-            msGraph.addToGroup(id, user.groups.get(i));
+        for (int i = 0; i < user.getGroups().size(); i++) {
+            msGraph.addToGroup(id, user.getGroups().get(i));
         }
         return "redirect:/users/" + id;
     }
@@ -250,7 +250,7 @@ public class WebController {
     public String deleteGroup(@PathVariable(value = "id") String id, Model model) throws IOException {
         Graph msGraph = new Graph();
         User user = msGraph.getAdUser(id);
-        adUser aduser = new adUser();
+        AdUser aduser = new AdUser();
         List<Group> groups = msGraph.groupsOf(id);
         model.addAttribute("user", user);
         model.addAttribute("groups", groups);
@@ -267,12 +267,12 @@ public class WebController {
      * @throws IOException
      */
     @PostMapping("/deleteGroup{id}")
-    public String deleteGroupP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,
+    public String deleteGroupP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") AdUser user,
             Model Model) throws IOException {
         Graph msGraph = new Graph();
         String id = requestParams.get("id");
-        for (int i = 0; i < user.groups.size(); i++) {
-            msGraph.deleteFromGroup(id, user.groups.get(i));
+        for (int i = 0; i < user.getGroups().size(); i++) {
+            msGraph.deleteFromGroup(id, user.getGroups().get(i));
         }
         return "redirect:/users/" + id;
     }
@@ -288,7 +288,7 @@ public class WebController {
     public String giveRole(@PathVariable(value = "id") String id, Model model) throws IOException {
         Graph msGraph = new Graph();
         User user = msGraph.getAdUser(id);
-        adUser aduser = new adUser();
+        AdUser aduser = new AdUser();
         Set<DirectoryRole> roles = msGraph.NotHaveRoleList(id);
         model.addAttribute("user", user);
         model.addAttribute("roles", roles);
@@ -305,12 +305,12 @@ public class WebController {
      * @throws IOException
      */
     @PostMapping("/giveRole{id}")
-    public String giveRoleP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,
+    public String giveRoleP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") AdUser user,
             Model Model) throws IOException {
         Graph msGraph = new Graph();
         String id = requestParams.get("id");
-        for (int i = 0; i < user.roles.size(); i++) {
-            msGraph.grantRole(user.roles.get(i), id);
+        for (int i = 0; i < user.getRoles().size(); i++) {
+            msGraph.grantRole(user.getRoles().get(i), id);
         }
         return "redirect:/users/" + id;
     }
@@ -326,7 +326,7 @@ public class WebController {
     public String deleteRole(@PathVariable(value = "id") String id, Model model) throws IOException {
         Graph msGraph = new Graph();
         User user = msGraph.getAdUser(id);
-        adUser aduser = new adUser();
+        AdUser aduser = new AdUser();
         List<DirectoryRole> roles = msGraph.GetAllRoleFrom(id);
         model.addAttribute("user", user);
         model.addAttribute("roles", roles);
@@ -343,12 +343,12 @@ public class WebController {
      * @throws IOException
      */
     @PostMapping("/deleteRole{id}")
-    public String deleteRoleP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") adUser user,
+    public String deleteRoleP(@RequestParam Map<String, String> requestParams, @ModelAttribute("user") AdUser user,
             Model Model) throws IOException {
         Graph msGraph = new Graph();
         String id = requestParams.get("id");
-        for (int i = 0; i < user.roles.size(); i++) {
-            msGraph.deleteRoleFrom(user.roles.get(i), id);
+        for (int i = 0; i < user.getRoles().size(); i++) {
+            msGraph.deleteRoleFrom(user.getRoles().get(i), id);
         }
         return "redirect:/users/" + id;
     }
@@ -362,7 +362,7 @@ public class WebController {
      */
     @GetMapping("/scopes")
     public String scopePage(Model model) throws IOException, SQLException {
-        dbConnect db = new dbConnect();
+        DbConnect db = new DbConnect();
         Scope scope = new Scope();
         model.addAttribute("selectedScope", scope);
         List<Scope> scopeList = db.getScopeList();
@@ -382,7 +382,7 @@ public class WebController {
     public String scopePageP(Model Model, @ModelAttribute("selectedScope") Scope scope)
             throws IOException, SQLException {
 
-        dbConnect db = new dbConnect();
+        DbConnect db = new DbConnect();
         Scope newScope = db.getScope(scope.getScopeName());
         newScope.writeInFile();
         return "redirect:/index";
@@ -411,7 +411,7 @@ public class WebController {
      */
     @PostMapping("/addScope")
     public String addScopeP(Model model, @ModelAttribute("scope") Scope scope) throws IOException, SQLException {
-        dbConnect db = new dbConnect();
+        DbConnect db = new DbConnect();
         db.addScope(scope.getTenantId(), scope.getPassword(), scope.getScopeName(), scope.getAppId());
         return "redirect:/scopes";
     }
@@ -425,10 +425,10 @@ public class WebController {
      */
     @GetMapping("/adChanges")
     public String adChanges(Model model) throws IOException, SQLException {
-        changeDetect detect = new changeDetect();
-        List<adChanges> changes = new ArrayList<adChanges>();
+        ChangeDetect detect = new ChangeDetect();
+    List<AdChanges> changes = new ArrayList<AdChanges>();
         changes = detect.changesList();
-        changesWrapper wrap = new changesWrapper();
+        ChangesWrapper wrap = new ChangesWrapper();
         wrap.setChangesList(changes);
         model.addAttribute("wrapper", wrap);
         return "adChanges";
@@ -445,11 +445,11 @@ public class WebController {
      * @throws ParseException
      */
     @PostMapping("/adChanges")
-    public String adChangesP(Model model, @ModelAttribute("wrapper") changesWrapper Viewlist,
+    public String adChangesP(Model model, @ModelAttribute("wrapper") ChangesWrapper Viewlist,
             BindingResult bindingResult) throws IOException, SQLException, ParseException {
-        dbConnect db=new dbConnect();
-        changeDetect detect = new changeDetect();
-        List<adChanges> list = new ArrayList<adChanges>();
+        DbConnect db=new DbConnect();
+        ChangeDetect detect = new ChangeDetect();
+        List<AdChanges> list = new ArrayList<AdChanges>();
         list = Viewlist.getChangesList();
         detect.applyAllChanges(list);
         db.refreshDb();
@@ -465,8 +465,8 @@ public class WebController {
      */
     @GetMapping("/history")
     public String history(Model model) throws IOException, SQLException {
-        dbConnect db = new dbConnect();
-        List<history> list = new ArrayList<history>();
+        DbConnect db = new DbConnect();
+        List<History> list = new ArrayList<History>();
         list = db.getHistoryList();
         model.addAttribute("list", list);
         return "history";
@@ -482,8 +482,8 @@ public class WebController {
      */
     @GetMapping("/history/{id}")
     public String historyDetail(@PathVariable(value = "id") String id, Model model) throws IOException, SQLException {
-        dbConnect db = new dbConnect();
-        List<adChanges> list = new ArrayList<adChanges>();
+        DbConnect db = new DbConnect();
+        List<AdChanges> list = new ArrayList<AdChanges>();
         list = db.getChangesList(Integer.parseInt(id));
         model.addAttribute("list", list);
         model.addAttribute("id", id);
@@ -501,14 +501,14 @@ public class WebController {
     @PostMapping("/deleteHistory")
     public String deleteHistory(@RequestParam Map<String, String> requestParams)
             throws IOException, NumberFormatException, SQLException {
-        dbConnect db = new dbConnect();
+        DbConnect db = new DbConnect();
         db.deleteHistory(Integer.parseInt(requestParams.get("id")));
         return "redirect:/history";
     }
 
     @PostMapping("/refreshdb")
     public void refreshdb() throws IOException, SQLException, ParseException{
-        dbConnect db= new dbConnect();
+        DbConnect db= new DbConnect();
         db.refreshDb();
     }
 }

@@ -19,7 +19,7 @@ import com.tecsoftiam.WebappApplication;
  * compare data to the DB 
  * Author: Deryck Olivier
  */
-public class dbConnect {
+public class DbConnect {
     final Properties properties = new Properties();
     // init app properties and db connection
     Connection connection;
@@ -33,7 +33,7 @@ public class dbConnect {
      * @throws IOException  if cannot read properties files
      * @throws SQLException if cannot connect to the db
      */
-    public dbConnect() throws IOException, SQLException {
+    public DbConnect() throws IOException, SQLException {
         oAuthProperties.load(WebappApplication.class.getClassLoader().getResourceAsStream("oAuth.properties"));
         properties.load(WebappApplication.class.getClassLoader().getResourceAsStream("application.properties"));
         this.connection = DriverManager.getConnection(properties.getProperty("url"), properties);
@@ -88,7 +88,7 @@ public class dbConnect {
      * @param list list of ad Changes related to that history
      * @throws SQLException if sql error
      */
-    public void insertHistory(Date date, List<adChanges> list) throws SQLException {
+    public void insertHistory(Date date, List<AdChanges> list) throws SQLException {
         PreparedStatement insertStatement = connection
                 .prepareStatement("INSERT INTO history (date, scope) VALUES (?, ?) ;", Statement.RETURN_GENERATED_KEYS);
         insertStatement.setDate(1, date);
@@ -99,7 +99,7 @@ public class dbConnect {
         int id = 0;
         String description;
         String state;
-        adChanges current;
+        AdChanges current;
         if (rs.next()) {
             id = rs.getInt(1);
         }
@@ -730,10 +730,10 @@ public class dbConnect {
      * @return a list of users
      * @throws SQLException
      */
-    public List<adUser> getUserList() throws SQLException {
+    public List<AdUser> getUserList() throws SQLException {
         ResultSet set;
-        adUser usr = new adUser();
-        List<adUser> usersList = new ArrayList<adUser>();
+        AdUser usr = new AdUser();
+        List<AdUser> usersList = new ArrayList<AdUser>();
         PreparedStatement readStatement = connection
                 .prepareStatement("SELECT  dislayName, id FROM adusers where scopeName=?");
         readStatement.setString(1, currentAD);
@@ -753,15 +753,15 @@ public class dbConnect {
      * @return a list of history
      * @throws SQLException
      */
-    public List<history> getHistoryList() throws SQLException {
+    public List<History> getHistoryList() throws SQLException {
         ResultSet set;
         
-        List<com.tecsoftiam.webapp.history> historyList = new ArrayList<com.tecsoftiam.webapp.history>();
+        List<com.tecsoftiam.webapp.History> historyList = new ArrayList<com.tecsoftiam.webapp.History>();
         PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM history where scope=?");
         readStatement.setString(1, currentAD);
         set = readStatement.executeQuery();
         while (set.next()) {
-            com.tecsoftiam.webapp.history hist = new com.tecsoftiam.webapp.history();
+            com.tecsoftiam.webapp.History hist = new com.tecsoftiam.webapp.History();
             hist.setId(set.getInt("id"));
             hist.setDate(set.getDate("date"));
             hist.setDescription(set.getString("description"));
@@ -778,15 +778,15 @@ public class dbConnect {
      * @return a list of adChange
      * @throws SQLException
      */
-    public List<adChanges> getChangesList(int id) throws SQLException {
+    public List<AdChanges> getChangesList(int id) throws SQLException {
         ResultSet set;
 
-        List<adChanges> changeList = new ArrayList<adChanges>();
+        List<AdChanges> changeList = new ArrayList<AdChanges>();
         PreparedStatement readStatement = connection.prepareStatement("SELECT  * FROM adchange where historyID= ?");
         readStatement.setInt(1, id);
         set = readStatement.executeQuery();
         while (set.next()) {
-            adChanges change = new adChanges();
+            AdChanges change = new AdChanges();
             change.setDescription(set.getString("description"));
             change.setStatus(set.getString("status"));
             changeList.add(change);

@@ -7,10 +7,10 @@ import java.util.List;
  * Wrapper class for change list
  * Author: Deryck Olivier
  */
-public class changesWrapper {
-    private List<adChanges> changesList = new ArrayList<adChanges>();
+public class ChangesWrapper {
+    private List<AdChanges> changesList = new ArrayList<AdChanges>();
 
-    public changesWrapper() {
+    public ChangesWrapper() {
 
     }
 
@@ -18,7 +18,7 @@ public class changesWrapper {
     /** 
      * @return List<adChanges>
      */
-    public List<adChanges> getChangesList() {
+    public List<AdChanges> getChangesList() {
         return this.changesList;
     }
 
@@ -26,7 +26,7 @@ public class changesWrapper {
     /** 
      * @param changesList
      */
-    public void setChangesList(List<adChanges> changesList) {
+    public void setChangesList(List<AdChanges> changesList) {
         this.changesList = changesList;
     }
 

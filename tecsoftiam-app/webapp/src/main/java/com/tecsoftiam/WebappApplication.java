@@ -33,7 +33,7 @@ import com.microsoft.graph.requests.UserCollectionPage;
 import com.microsoft.graph.serializer.ISerializer;
 import com.tecsoftiam.webapp.AppUser;
 import com.tecsoftiam.webapp.Graph;
-import com.tecsoftiam.webapp.dbConnect;
+import com.tecsoftiam.webapp.DbConnect;
 
 
 import org.json.JSONObject;
@@ -68,14 +68,7 @@ public class WebappApplication extends SpringBootServletInitializer {
 	 */
 	public static void main(String[] args) throws IOException, SQLException, ParseException {
 
-		Graph graphtest = new Graph();
-		dbConnect db = new dbConnect();
-		List<Domain> lst= graphtest.domainList();
-		for(int i=0;i<lst.size();i++){
-			System.out.println(lst.get(i).id);
-		}
-	//	User test=graphtest.getAdUser("2e669a38-c1d6-4de8-881d-60e30f5f92ed");
-	//	graphtest.grantRole("f2ef992c-3afb-46b9-b7cf-a126ee74c451", "41178371-8633-4b5e-9618-cb4afd973301");
+		
 		SpringApplication.run(WebappApplication.class, args);
 
 	}

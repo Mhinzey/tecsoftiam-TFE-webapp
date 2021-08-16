@@ -10,7 +10,7 @@ import com.microsoft.graph.models.User;
  * This class represents a adChange object. It contains a status, and details about the change
  * Author: Deryck Olivier
  */
-public class adChanges {
+public class AdChanges {
 
     Boolean refused = false;
     String cible;
@@ -24,7 +24,7 @@ public class adChanges {
      * @param desc full description of the change
      * @param status validated or not
      */
-    public adChanges(String desc, String status) {
+    public AdChanges(String desc, String status) {
         this.description = desc;
         this.status = status;
     }
@@ -32,7 +32,7 @@ public class adChanges {
     /**
      * empty constructor
      */
-    public adChanges() {
+    public AdChanges() {
 
     }
 
@@ -42,7 +42,7 @@ public class adChanges {
      * @param type change type
      * @param refused refused or not
      */
-    public adChanges(String cible, String type, Boolean refused) {
+    public AdChanges(String cible, String type, Boolean refused) {
         this.cible = cible;
         this.type = type;
         this.refused = refused;
@@ -158,7 +158,7 @@ public class adChanges {
      * @throws SQLException
      */
     public void applyChange() throws IOException, SQLException {
-        dbConnect db = new dbConnect();
+        DbConnect db = new DbConnect();
         Graph graph = new Graph();
         User user;
         DirectoryRole role;

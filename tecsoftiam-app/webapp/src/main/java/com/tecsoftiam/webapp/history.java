@@ -6,7 +6,7 @@ import java.sql.Date;
  * Object class for history 
  * Author: Deryck Olivier
  */
-public class history {
+public class History {
     int id;
     Date date;
     String description;
@@ -14,7 +14,7 @@ public class history {
     /**
      * Empty constructor
      */
-    public history() {
+    public History() {
 
     }
 
@@ -25,7 +25,7 @@ public class history {
      * @param date history creation date
      * @param desc history description
      */
-    public history(int id, Date date, String desc) {
+    public History(int id, Date date, String desc) {
         this.id = id;
         this.date = date;
         this.description = desc;

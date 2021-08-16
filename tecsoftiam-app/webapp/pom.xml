@@ -11,7 +11,7 @@
 	<groupId>com.tecsoftiam</groupId>
 	<artifactId>webapp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>webapp</name>
 	<description>tecsoftiamwebapp</description>
 	<properties>
@@ -190,6 +190,19 @@
 
 	<build>
 		<plugins>
+		 <plugin>
+      <artifactId>maven-assembly-plugin</artifactId>
+      <configuration>
+        <archive>
+          <manifest>
+            <mainClass>com.tecsoftiam.WebappApplication</mainClass>
+          </manifest>
+        </archive>
+        <descriptorRefs>
+          <descriptorRef>jar-with-dependencies</descriptorRef>
+        </descriptorRefs>
+      </configuration>
+    </plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
