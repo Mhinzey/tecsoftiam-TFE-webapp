@@ -52,6 +52,7 @@ public class Graph {
     private LinkedList<Option> requestOptions = new LinkedList<Option>();
     private GraphServiceClient graphclient;
     private Scope scope;
+    
 
     /**
      * Constructor, load properties from config files
@@ -62,7 +63,7 @@ public class Graph {
         scope = new Scope();
         oAuthProperties.load(WebappApplication.class.getClassLoader().getResourceAsStream("oAuth.properties"));
         this.scopes = Arrays.asList(oAuthProperties.getProperty("app.scopes").split(","));
-        this.clientId = oAuthProperties.getProperty("app.id");
+        this.clientId = scope.getAppId();
         this.clientSecret = scope.getPassword();
         this.tenant = scope.getTenantId();
 

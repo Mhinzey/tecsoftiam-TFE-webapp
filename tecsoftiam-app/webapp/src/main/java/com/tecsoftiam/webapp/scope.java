@@ -1,5 +1,6 @@
 package com.tecsoftiam.webapp;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -17,6 +18,7 @@ public class Scope {
     private String scopeName;
     private String appId;
     private Properties oAuthProperties = new Properties();
+    String path = "./oAuth.properties";
 
     /**
      * create scope from parameters
@@ -51,14 +53,31 @@ public class Scope {
      * @throws IOException
      */
     public Scope() throws IOException {
+        try{
+        FileInputStream file= new FileInputStream(path);
+        Properties write= new Properties();
+        write.load(file);
+        this.tenantId = write.getProperty("app.tenant");
+        this.password = write.getProperty("app.secret");
+        this.scopeName = write.getProperty("app.scopename");
+        this.appId=write.getProperty("app.id");
+        System.out.println("ok");
+        }
+        catch(Exception e) {
+            System.out.println("firstload");
+            firstLoad();
+        }
+
+    }
+
+    public void firstLoad() throws IOException{
         oAuthProperties.load(WebappApplication.class.getClassLoader().getResourceAsStream("oAuth.properties"));
         this.tenantId = oAuthProperties.getProperty("app.tenant");
         this.password = oAuthProperties.getProperty("app.secret");
         this.scopeName = oAuthProperties.getProperty("app.scopename");
         this.appId=oAuthProperties.getProperty("app.id");
-
+        writeInFile();
     }
-
     /**
      * empty consctruct, not used
      * 
@@ -73,14 +92,14 @@ public class Scope {
      * @throws IOException
      */
     public void writeInFile() throws IOException {
-        oAuthProperties.load(WebappApplication.class.getClassLoader().getResourceAsStream("oAuth.properties"));
-        oAuthProperties.setProperty("app.secret", this.password);
-        oAuthProperties.setProperty("app.tenant", this.tenantId);
-        oAuthProperties.setProperty("app.scopename", this.scopeName);
-        oAuthProperties.setProperty("app.id", this.appId);
-        URL url = WebappApplication.class.getClassLoader().getResource("oAuth.properties");
-        String path = url.getPath();
-        oAuthProperties.store(new FileOutputStream(path), null);
+        
+        FileOutputStream fos = new FileOutputStream(path);
+        Properties write= new Properties();
+        write.setProperty("app.secret", this.password);
+        write.setProperty("app.tenant", this.tenantId);
+        write.setProperty("app.scopename", this.scopeName);
+        write.setProperty("app.id", this.appId);
+        write.store(new FileOutputStream(path), null);
 
     }
 
