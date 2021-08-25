@@ -6,7 +6,13 @@
   version="3.0">
 
 </web-app>
+<welcome-file>index.jsp</welcome-file>
 <servlet>
-	<servlet-name>Servlet</servlet-name>
-	<servlet-class>com.sdzee.servlets.Test</servlet-class>
+  <servlet-mapping>
+  <servlet-name>Index</servlet-name>
+  <url-pattern>/Index</url-pattern>
+</servlet>
+<servlet>
+    <servlet-name>Users</servlet-name>
+    <jsp-file>view-users.jsp</jsp-file>
 </servlet>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script type="text/javascript" th:src="@{/static/js/user.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/jquery-3.6.0.min.js}"></script>
+    <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/static/css/main.css}" />
+  </head>
+  <body>
+    <div class="topnav">
+      <button name="IndexButton"  class="navitem active" onclick="window.location.href='/index'">Home</button>
+      <form   th:action="@{/logout}" method="post">
+          <input class="navitem" type="submit" value="Logout" />
+      </form>
+    <button name="scopeSelect" class="navitem" onclick="window.location.href='/scopes'">Scope selection</button>
+  
+</div>
+    <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]]</h3>
+    <div class="container">
+
+      <div th:if="${not #lists.isEmpty(roleList)}"></div>
+      <table class = "table table-striped"> 
+        <thead>
+          <tr th:each="user : ${users}">
+              <th colspan="2" th:text="${user.displayName}" ></th>>User details</th>
+
+              <form id="deleteUser" method="POST" th:action="@{/deleteUser(id=${user.id})}">
+                <button   name="submit" value="value" onclick="myValidationFunction()" class="link-button">DELETE USER</button>
+            </form>
+            
+              <button  name="giveRoleb"  th:onclick="giveRole([[${user.id}]])" class="link-button">add roles</button>      
+            <button name="removeRoleb"  th:onclick="deleteRole([[${user.id}]])" class="link-button">remove roles</button>
+            <button  name="giveGroupb"  th:onclick="giveGroup([[${user.id}]])" class="link-button">add groups</button>      
+            <button name="removeGroupb"  th:onclick="deleteGroup([[${user.id}]])" class="link-button">remove groups</button>
+          </tr>
+      </thead>     
+        
+         <tr>
+         <th> Member of roles:</th>
+         
+         </tr>       
+         <tr  th:each="role : ${roleList}" style="cursor: pointer" >
+         <td th:text="${role.displayName}" ></td>
+         </tr>
+         <tr>
+          <th> Member of groups:</th>
+          
+          </tr>       
+          <tr  th:each="group : ${groupList}" style="cursor: pointer" >
+          <td th:text="${group.displayName}" ></td>
+          </tr>
+        </table>
+</div>
+
+  </body>
+</html>
