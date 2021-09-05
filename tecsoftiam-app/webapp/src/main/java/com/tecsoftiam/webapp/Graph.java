@@ -581,7 +581,7 @@ public class Graph {
                 roleA = allGroups.get(i);
                 state = true;
                 for (int j = 0; j < hasGroup.size(); j++) {
-                    state = true;
+                    
 
                     roleB = hasGroup.get(j);
                     if ((roleA.displayName.equals(roleB.displayName))) {

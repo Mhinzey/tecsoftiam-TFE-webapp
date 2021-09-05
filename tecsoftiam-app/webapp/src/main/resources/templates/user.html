@@ -18,7 +18,7 @@
 </div>
     <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]]</h3>
     <div class="container">
-
+<button name="createUserB" class=" btn-primary" onclick="window.location.href='/createUser'">create user</button>
       <div th:if="${not #lists.isEmpty(users)}"></div>
      
       <table class = "table table-striped"> 
@@ -40,7 +40,7 @@
         </table>
 </div>
 
-<button name="createUserB" onclick="window.location.href='/createUser'">create user</button>
+
 
 
   </body>

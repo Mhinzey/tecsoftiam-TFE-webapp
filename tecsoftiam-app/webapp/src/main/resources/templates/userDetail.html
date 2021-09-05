@@ -24,16 +24,16 @@
       <table class = "table table-striped"> 
         <thead>
           <tr th:each="user : ${users}">
-              <th colspan="2" th:text="${user.displayName}" ></th>>User details</th>
+              <th colspan="2" th:text="${user.displayName}" ></th>>User details</th><br>
 
               <form id="deleteUser" method="POST" th:action="@{/deleteUser(id=${user.id})}">
-                <button   name="submit" value="value" onclick="myValidationFunction()" class="link-button">DELETE USER</button>
+                <button   name="submit" value="value" onclick="myValidationFunction()" class="link-button btn-danger">DELETE USER</button>
             </form>
             
-              <button  name="giveRoleb"  th:onclick="giveRole([[${user.id}]])" class="link-button">add roles</button>      
-            <button name="removeRoleb"  th:onclick="deleteRole([[${user.id}]])" class="link-button">remove roles</button>
-            <button  name="giveGroupb"  th:onclick="giveGroup([[${user.id}]])" class="link-button">add groups</button>      
-            <button name="removeGroupb"  th:onclick="deleteGroup([[${user.id}]])" class="link-button">remove groups</button>
+              <button  name="giveRoleb"  th:onclick="giveRole([[${user.id}]])" class="link-button btn-primary">add roles</button>      
+            <button name="removeRoleb"  th:onclick="deleteRole([[${user.id}]])" class="link-button btn-primary">remove roles</button>
+            <button  name="giveGroupb"  th:onclick="giveGroup([[${user.id}]])" class="link-button btn-primary">add groups</button>      
+            <button name="removeGroupb"  th:onclick="deleteGroup([[${user.id}]])" class="link-button btn-primary">remove groups</button>
           </tr>
       </thead>     
         

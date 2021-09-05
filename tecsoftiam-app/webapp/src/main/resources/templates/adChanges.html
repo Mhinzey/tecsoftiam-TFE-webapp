@@ -17,9 +17,9 @@
     
   </div>
 
-    <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]]</h3>
+   
     <div class="container">
-      
+       <h3 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]]</h3>
       <div th:if="${not #lists.isEmpty(changes)}"></div>
       <form action="#" id="changeForm" th:action="@{/adChanges}" th:object="${wrapper}" method="post">
       <table class = "table table-striped"> 
@@ -48,9 +48,9 @@
      
         </tbody>
         </table>
-        <button class="hidden-print" onclick="changeValidation()" type="submit">Validate</button>    
+        <button class="hidden-print btn-primary" onclick="changeValidation()" type="submit">Validate</button>    
       </form>
-        <button class="hidden-print" name="printPage"onclick="window.print();return false">Print page</button>
+        <button class="hidden-print btn-primary" name="printPage"onclick="window.print();return false">Print page</button>
 </div >
 
   </body>
