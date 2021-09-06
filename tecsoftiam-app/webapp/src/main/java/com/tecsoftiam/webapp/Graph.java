@@ -61,8 +61,7 @@ public class Graph {
      */
     public Graph() throws IOException {
         scope = new Scope();
-        oAuthProperties.load(WebappApplication.class.getClassLoader().getResourceAsStream("oAuth.properties"));
-        this.scopes = Arrays.asList(oAuthProperties.getProperty("app.scopes").split(","));
+        this.scopes = Arrays.asList("https://graph.microsoft.com/.default");
         this.clientId = scope.getAppId();
         this.clientSecret = scope.getPassword();
         this.tenant = scope.getTenantId();
